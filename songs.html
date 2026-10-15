@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>All Songs | MoriMorsels JDot</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+.page-header {
+  padding: calc(var(--nav-height) + 80px) 24px 40px;
+  text-align: center;
+}
+.page-sub {
+  font-size: 0.85rem;
+  color: var(--muted);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-top: 14px;
+}
+.filter-bar {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 50px;
+  flex-wrap: wrap;
+}
+.filter-btn {
+  padding: 11px 24px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.3s var(--ease);
+  font-family: var(--font-body);
+}
+.filter-btn:hover { color: #fff; border-color: var(--red-1); }
+.filter-btn.active {
+  background: var(--red-1);
+  color: #fff;
+  border-color: var(--red-bright);
+  box-shadow: 0 0 22px var(--red-glow);
+}
+.songs-list {
+  max-width: 900px;
+  margin: 0 auto;
+}
+.song-row {
+  display: grid;
+  grid-template-columns: 1fr 50px;
+  align-items: center;
+  padding: 20px 24px;
+  margin-bottom: 10px;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  transition: all 0.3s var(--ease);
+  cursor: pointer;
+}
+.song-row:hover {
+  border-color: var(--red-bright);
+  box-shadow: 0 0 28px rgba(139, 0, 0, 0.4);
+}
+.song-info h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-bright);
+  margin-bottom: 2px;
+}
+.song-info p {
+  font-size: 0.72rem;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.song-expand {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: rgba(139, 0, 0, 0.15);
+  border: 1px solid var(--red-1);
+  color: var(--red-bright);
+  font-size: 1.2rem;
+  transition: all 0.3s var(--ease);
+  cursor: pointer;
+}
+.song-expand:hover { background: var(--red-bright); color: #fff; }
+.song-expand.open { transform: rotate(45deg); }
+.latest-tag {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 20px;
+  background: var(--red-bright);
+  color: #fff;
+  font-size: 0.55rem;
+  font-weight: 900;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-left: 10px;
+  box-shadow: 0 0 14px var(--red-bright);
+  vertical-align: middle;
+  animation: pulseLatest 2s ease-in-out infinite;
+}
+@keyframes pulseLatest {
+  0%,100% { box-shadow: 0 0 14px var(--red-bright); }
+  50% { box-shadow: 0 0 26px var(--red-bright), 0 0 40px var(--red-glow); }
+}
+.song-details {
+  display: none;
+  padding: 20px 24px;
+  margin: -6px 0 10px 0;
+  background: var(--glass-bg-strong);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-top: none;
+  border-radius: 0 0 var(--radius) var(--radius);
+}
+.song-details.open {
+  display: block;
+  animation: slideDown 0.3s var(--ease);
+}
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.song-details p {
+  font-size: 0.72rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 12px;
+}
+.song-platforms {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.song-platforms a {
+  padding: 8px 16px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 1px solid var(--glass-border);
+  border-radius: 6px;
+  background: var(--glass-bg);
+  color: var(--muted);
+  transition: all 0.3s var(--ease);
+}
+.song-platforms a:hover {
+  color: #fff;
+  border-color: var(--red-bright);
+  background: var(--red-1);
+}
+.status-text {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--muted);
+  font-size: 0.85rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+.status-text.loading::after {
+  content: '';
+  display: inline-block;
+  width: 14px;
+  text-align: left;
+  animation: dots 1.4s steps(4, end) infinite;
+}
+@keyframes dots {
+  0% { content: ''; }
+  25% { content: '.'; }
+  50% { content: '..'; }
+  75% { content: '...'; }
+  100% { content: ''; }
+}
+.last-updated {
+  text-align: center;
+  font-size: 0.68rem;
+  color: var(--muted-dim);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-top: 20px;
+}
+.songs-note {
+  text-align: center;
+  margin-top: 50px;
+  color: var(--muted);
+  font-size: 0.82rem;
+  letter-spacing: 0.1em;
+}
+@media (max-width: 640px) {
+  .song-row { grid-template-columns: 1fr 44px; padding: 16px; }
+  .song-info h3 { font-size: 0.9rem; }
+  .song-info p { font-size: 0.65rem; }
+  .song-details { padding: 16px; }
+  .filter-btn { padding: 9px 16px; font-size: 0.6rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="bg-layer bg-gradient"></div>
+<div class="bg-layer bg-glow"></div>
+<div class="bg-layer bg-noise"></div>
+<canvas id="particles"></canvas>
+
+<nav class="navbar">
+  <div class="nav-container">
+    <a href="index.html" class="nav-logo">
+      <span class="logo-mark">M</span>
+      <span class="logo-text">MORIMORSELS <em>JDOT</em></span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="music.html">Music</a></li>
+      <li><a href="videos.html">Videos</a></li>
+      <li><a href="songs.html" class="active">All Songs</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="contact.html">Contact</a></li>
+    </ul>
+    <button class="nav-toggle" aria-label="Menu">☰</button>
+  </div>
+</nav>
+
+<header class="page-header">
+  <div class="container">
+    <p class="section-eyebrow">COMPLETE CATALOG</p>
+    <h1 class="section-title">ALL SONGS</h1>
+    <p class="page-sub">Auto-synced with Spotify · Updated daily</p>
+  </div>
+</header>
+
+<section class="section">
+  <div class="container">
+
+    <div class="filter-bar">
+      <button class="filter-btn active" data-filter="all">All</button>
+      <button class="filter-btn" data-filter="single">Singles</button>
+      <button class="filter-btn" data-filter="album">Albums</button>
+    </div>
+
+    <div class="songs-list" id="songs-container">
+      <p class="status-text loading">Loading songs</p>
+    </div>
+
+    <p class="last-updated" id="last-updated"></p>
+
+    <p class="songs-note">Full catalog available on all streaming platforms.</p>
+
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container footer-inner">
+    <div class="footer-brand">MORIMORSELS <em>JDOT</em></div>
+    <p>© 2026 MoriMorsels JDot. All rights reserved.</p>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+
+<script>
+(function () {
+  'use strict';
+
+  // Platforms — every known platform for MoriMorsels JDot
+  var PLATFORMS = [
+    { name: 'Spotify',       url: 'https://open.spotify.com/artist/72RLZjzQjhCvtMraxrqVtO' },
+    { name: 'Apple Music',   url: 'https://music.apple.com/ng/artist/morimorsels-jdot/1856608319' },
+    { name: 'SoundCloud',    url: 'https://soundcloud.com/morimorselsjdot' },
+    { name: 'Audiomack',     url: 'https://audiomack.com/morimorselsjdot' },
+    { name: 'YouTube Music', url: 'https://music.youtube.com/channel/UCU2dxCVjy_6nW7Pyjbgl-IA' },
+    { name: 'Boomplay',      url: 'https://www.boomplay.com/artists/116625599' },
+    { name: 'Qobuz',         url: 'https://www.qobuz.com/us-en/interpreter/morimorsels-jdot/29626063' },
+    { name: 'Genius',        url: 'https://genius.com/artists/Morimorsels-jdot' },
+    { name: 'YouTube',       url: 'https://www.youtube.com/channel/UCU2dxCVjy_6nW7Pyjbgl-IA' }
+  ];
+
+  var $  = function (s, c) { return (c || document).querySelector(s); };
+  var $$ = function (s, c) { return Array.prototype.slice.call((c || document).querySelectorAll(s)); };
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function formatDate(dateStr) {
+    if (!dateStr) return 'Unknown date';
+    var parts = String(dateStr).split('-');
+    var year = parts[0];
+    var month = parts[1] ? parseInt(parts[1], 10) : 1;
+    var day = parts[2] ? parseInt(parts[2], 10) : null;
+    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    var m = months[(month - 1 + 12) % 12] || 'Jan';
+    return day ? (m + ' ' + day + ', ' + year) : (m + ' ' + year);
+  }
+
+  function formatType(type) {
+    if (!type) return 'Single';
+    var t = String(type).toLowerCase();
+    if (t === 'album')   return 'Album';
+    if (t === 'single')  return 'Single';
+    if (t === 'ep')      return 'EP';
+    if (t === 'compilation') return 'Compilation';
+    return t.charAt(0).toUpperCase() + t.slice(1);
+  }
+
+  function sortByDateDesc(arr) {
+    return arr.slice().sort(function (a, b) {
+      var da = a.release_date || '1900-01-01';
+      var db = b.release_date || '1900-01-01';
+      return db.localeCompare(da);
+    });
+  }
+
+  function renderSongs(releases) {
+    var container = $('#songs-container');
+    if (!container) return;
+
+    if (!releases || releases.length === 0) {
+      container.innerHTML = '<p class="status-text">No releases found. Check back soon.</p>';
+      return;
+    }
+
+    var sorted = sortByDateDesc(releases);
+    var latestName = sorted[0] ? sorted[0].name : null;
+
+    container.innerHTML = sorted.map(function (song) {
+      var isLatest = song.name === latestName;
+      var type = song.type || 'single';
+      var platformsHtml = PLATFORMS.map(function (p) {
+        var url = p.url;
+        if (p.name === 'Spotify' && song.spotify_url) url = song.spotify_url;
+        return '<a href="' + escapeHtml(url) + '" target="_blank" rel="noopener">' + escapeHtml(p.name) + '</a>';
+      }).join('');
+
+      return '' +
+        '<div class="song-row" data-type="' + escapeHtml(type) + '">' +
+          '<div class="song-info">' +
+            '<h3>' +
+              escapeHtml(song.name) +
+              (isLatest ? '<span class="latest-tag">Latest</span>' : '') +
+            '</h3>' +
+            '<p>' +
+              formatType(type) + ' · ' + (song.total_tracks || 1) + ' Song' + ((song.total_tracks || 1) > 1 ? 's' : '') + ' · ' + formatDate(song.release_date) +
+            '</p>' +
+          '</div>' +
+          '<button class="song-expand" aria-label="View details">+</button>' +
+        '</div>' +
+        '<div class="song-details">' +
+          '<p>Available on:</p>' +
+          '<div class="song-platforms">' + platformsHtml + '</div>' +
+        '</div>';
+    }).join('');
+
+    attachExpandHandlers();
+    initFilter();
+  }
+
+  function attachExpandHandlers() {
+    $$('.song-expand').forEach(function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var row = btn.closest('.song-row');
+        var details = row.nextElementSibling;
+        if (!details || !details.classList.contains('song-details')) return;
+
+        var isOpen = details.classList.contains('open');
+
+        $$('.song-details.open').forEach(function (d) { d.classList.remove('open'); });
+        $$('.song-expand.open').forEach(function (b) { b.classList.remove('open'); });
+
+        if (!isOpen) {
+          details.classList.add('open');
+          btn.classList.add('open');
+        }
+      });
+    });
+
+    $$('.song-row').forEach(function (row) {
+      row.addEventListener('click', function (e) {
+        if (e.target.closest('.song-expand')) return;
+        var btn = row.querySelector('.song-expand');
+        if (btn) btn.click();
+      });
+    });
+  }
+
+  function initFilter() {
+    var btns = $$('.filter-btn');
+    var rows = $$('.song-row');
+
+    btns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var filter = btn.getAttribute('data-filter');
+        btns.forEach(function (b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+
+        rows.forEach(function (row) {
+          var type = row.getAttribute('data-type');
+          var show = filter === 'all' || type === filter;
+          row.style.display = show ? 'grid' : 'none';
+
+          var details = row.nextElementSibling;
+          if (details && details.classList.contains('song-details')) {
+            if (!show) {
+              details.classList.remove('open');
+              var expandBtn = row.querySelector('.song-expand');
+              if (expandBtn) expandBtn.classList.remove('open');
+            }
+          }
+        });
+      });
+    });
+  }
+
+  function loadSongs() {
+    fetch('/songs-data.json', { cache: 'no-cache' })
+      .then(function (res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.json();
+      })
+      .then(function (data) {
+        var releases = Array.isArray(data) ? data : (data.releases || []);
+        renderSongs(releases);
+        var updated = data.lastUpdated ? new Date(data.lastUpdated) : null;
+        if (updated) {
+          var el = $('#last-updated');
+          if (el) el.textContent = 'Last synced: ' + updated.toLocaleString();
+        }
+      })
+      .catch(function (err) {
+        console.warn('Failed to load songs-data.json:', err.message);
+        var container = $('#songs-container');
+        if (container) {
+          container.innerHTML = '<p class="status-text">Songs loading. Check back shortly.</p>';
+        }
+      });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadSongs);
+  } else {
+    loadSongs();
+  }
+
+})();
+</script>
+
+</body>
+</html>

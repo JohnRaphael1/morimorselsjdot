@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gallery | MoriMorsels JDot</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="bg-layer bg-gradient"></div>
+<div class="bg-layer bg-glow"></div>
+<div class="bg-layer bg-noise"></div>
+<canvas id="particles"></canvas>
+
+<nav class="navbar">
+  <div class="nav-container">
+    <a href="index.html" class="nav-logo"><span class="logo-mark">M</span><span class="logo-text">MORIMORSELS <em>JDOT</em></span></a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="music.html">Music</a></li>
+      <li><a href="videos.html">Videos</a></li>
+      <li><a href="songs.html">All Songs</a></li>
+      <li><a href="gallery.html" class="active">Gallery</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="contact.html">Contact</a></li>
+    </ul>
+    <button class="nav-toggle" aria-label="Menu">☰</button>
+  </div>
+</nav>
+
+<header class="page-header">
+  <div class="container">
+    <p class="section-eyebrow">VISUALS</p>
+    <h1 class="section-title">GALLERY</h1>
+    <p class="page-sub">Photos, covers & behind the scenes</p>
+  </div>
+</header>
+
+<section class="section">
+  <div class="container">
+    <div class="gallery-grid">
+      <div class="gallery-item tall">
+        <img src="PASTE_STUDIO_PHOTO" alt="Studio session" onerror="this.style.display='none'">
+        <div class="g-fallback">STUDIO<br>SESSION</div>
+      </div>
+      <div class="gallery-item">
+        <img src="PASTE_MIC_PHOTO" alt="On the mic" onerror="this.style.display='none'">
+        <div class="g-fallback">ON<br>THE<br>MIC</div>
+      </div>
+      <div class="gallery-item">
+        <img src="PASTE_LAGOS_PHOTO" alt="Lagos nights" onerror="this.style.display='none'">
+        <div class="g-fallback">LAGOS<br>NIGHTS</div>
+      </div>
+      <div class="gallery-item wide">
+        <img src="PASTE_MORSELS_COVER" alt="MORSELS MODE cover" onerror="this.style.display='none'">
+        <div class="g-fallback">COVER · MORSELS MODE</div>
+      </div>
+      <div class="gallery-item">
+        <img src="PASTE_BACKSTAGE_PHOTO" alt="Backstage" onerror="this.style.display='none'">
+        <div class="g-fallback">BACKSTAGE</div>
+      </div>
+      <div class="gallery-item tall">
+        <img src="PASTE_BOOTH_PHOTO" alt="In the booth" onerror="this.style.display='none'">
+        <div class="g-fallback">IN THE<br>BOOTH</div>
+      </div>
+      <div class="gallery-item">
+        <img src="PASTE_STREET_PHOTO" alt="Street runner" onerror="this.style.display='none'">
+        <div class="g-fallback">STREET<br>RUNNER</div>
+      </div>
+      <div class="gallery-item wide">
+        <img src="PASTE_CHOPPA_COVER" alt="Choppa cover" onerror="this.style.display='none'">
+        <div class="g-fallback">COVER · CHOPPA</div>
+      </div>
+    </div>
+    <div class="see-more-wrap">
+      <a href="https://www.instagram.com/official_morimorselsjdot" target="_blank" rel="noopener" class="btn btn-outline">See More on Instagram →</a>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container footer-inner">
+    <div class="footer-brand">MORIMORSELS <em>JDOT</em></div>
+    <p>© 2026 MoriMorsels JDot. All rights reserved.</p>
+  </div>
+</footer>
+<script src="script.js"></script>
+</body>
+</html>
