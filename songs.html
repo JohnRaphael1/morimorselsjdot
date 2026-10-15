@@ -228,7 +228,7 @@
   <div class="container">
     <p class="section-eyebrow">COMPLETE CATALOG</p>
     <h1 class="section-title">ALL SONGS</h1>
-    <p class="page-sub">Updated from admin · Live</p>
+    <p class="page-sub">Updated from admin · Live for everyone</p>
   </div>
 </header>
 
@@ -419,12 +419,18 @@
     });
   }
 
-  function loadSongs() {
-    var stored = [];
+  async function loadSongs() {
     try {
-      stored = JSON.parse(localStorage.getItem('mmjd_releases') || '[]');
-    } catch (e) { stored = []; }
-    renderSongs(stored);
+      var res = await fetch('/api/songs');
+      var releases = await res.json();
+      renderSongs(releases);
+    } catch (err) {
+      console.error('Failed to load songs:', err);
+      var container = $('#songs-container');
+      if (container) {
+        container.innerHTML = '<p class="status-text">Could not load songs. Try again shortly.</p>';
+      }
+    }
   }
 
   if (document.readyState === 'loading') {

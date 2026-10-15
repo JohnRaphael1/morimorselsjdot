@@ -79,16 +79,6 @@
   </div>
 </section>
 
-<footer class="footer">
-  <div class="container footer-inner">
-    <div class="footer-brand">MORIMORSELS <em>JDOT</em></div>
-    <p>© 2026 MoriMorsels JDot. All rights reserved.</p>
-    <p style="margin-top: 14px;">
-      <a href="admin.html" style="font-size: 0.72rem; color: var(--muted); letter-spacing: 0.15em; text-transform: uppercase;">Admin</a>
-    </p>
-  </div>
-</footer>
-
 <script src="script.js"></script>
 
 <script>
@@ -135,13 +125,13 @@
     return t.charAt(0).toUpperCase() + t.slice(1);
   }
 
-  function loadFeatured() {
+  async function loadFeatured() {
     var list = [];
     try {
-      list = JSON.parse(localStorage.getItem('mmjd_releases') || '[]');
+      var res = await fetch('/api/songs');
+      list = await res.json();
     } catch (e) { list = []; }
 
-    // Sort newest first
     list.sort(function (a, b) {
       return (b.release_date || '').localeCompare(a.release_date || '');
     });
@@ -149,7 +139,7 @@
     var card = document.getElementById('featured-card');
     if (!card) return;
 
-    if (list.length === 0) {
+    if (!list || list.length === 0) {
       document.getElementById('featured-title').textContent = 'No releases yet';
       document.getElementById('featured-type').textContent = '—';
       document.getElementById('featured-date').textContent = '—';
@@ -166,7 +156,6 @@
     document.getElementById('featured-date').textContent =
       'Released ' + formatDate(s.release_date);
 
-    // Platforms
     var platEl = document.getElementById('featured-platforms');
     platEl.innerHTML = PLATFORMS.map(function (p) {
       var url = p.url;
@@ -175,6 +164,14 @@
         escapeHtml(p.name) + '</a>';
     }).join('');
   }
+
+  // Hidden admin access: Ctrl+Shift+A (or Cmd+Shift+A on Mac)
+  document.addEventListener('keydown', function (e) {
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'a') {
+      e.preventDefault();
+      window.location.href = 'admin.html';
+    }
+  });
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', loadFeatured);

@@ -229,7 +229,6 @@
       <div class="admin-list">
         <h2 style="font-family: var(--font-display); color: #fff; text-transform: uppercase; margin-bottom: 20px;">Added Releases</h2>
         <div id="release-list"></div>
-        <button id="clear-all" class="btn btn-outline full" style="margin-top: 20px; border-color: #500; color: #ff9e9e;">Clear All</button>
       </div>
 
       <button id="logout-btn" class="btn btn-outline logout-btn">Logout</button>
@@ -252,7 +251,6 @@
 
   var ADMIN_ID = 'MMJD2026';
   var ADMIN_PASS = 'MMJDOT';
-  var STORAGE_KEY = 'mmjd_releases';
 
   var $ = function (s) { return document.querySelector(s); };
 
@@ -286,7 +284,6 @@
     location.reload();
   });
 
-  // Auto-fetch from Spotify oEmbed
   $('#preview-btn').addEventListener('click', function () {
     var link = $('#sp-link').value.trim();
     if (!link) {
@@ -303,12 +300,9 @@
         $('#pv-title').textContent = data.title || '—';
         $('#pv-artist').textContent = data.author_name || '—';
         $('#preview-box').classList.add('show');
-
-        // Auto-fill form fields
         if (data.title) $('#in-name').value = data.title;
         if (data.author_name) $('#in-artist').value = data.author_name;
         if (data.thumbnail_url) $('#in-cover').value = data.thumbnail_url;
-
         showMsg('Fetched. Check the fields and add more info if needed.', 'ok');
       })
       .catch(function (err) {
@@ -316,7 +310,7 @@
       });
   });
 
-  $('#add-btn').addEventListener('click', function () {
+  $('#add-btn').addEventListener('click', async function () {
     var name = $('#in-name').value.trim();
     var artist = $('#in-artist').value.trim() || 'MoriMorsels JDot';
     var cover = $('#in-cover').value.trim();
@@ -330,33 +324,41 @@
       return;
     }
 
-    var list = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-    list.push({
-      id: Date.now(),
-      name: name,
-      artist: artist,
-      type: type,
-      release_date: date,
-      total_tracks: tracks,
-      cover: cover,
-      spotify_url: link,
-      added: new Date().toISOString()
-    });
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+    try {
+      var res = await fetch('/api/songs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: name,
+          artist: artist,
+          cover: cover,
+          release_date: date,
+          type: type,
+          total_tracks: tracks,
+          spotify_url: link,
+        }),
+      });
 
-    // Reset
-    $('#sp-link').value = '';
-    $('#in-name').value = '';
-    $('#in-cover').value = '';
-    $('#in-date').value = '';
-    $('#in-tracks').value = 1;
-    $('#preview-box').classList.remove('show');
-    $('#pv-img').src = '';
-    $('#pv-title').textContent = '—';
-    $('#pv-artist').textContent = '—';
+      if (!res.ok) {
+        var err = await res.json();
+        throw new Error(err.error || 'Failed to save');
+      }
 
-    renderList();
-    showMsg('Release added.', 'ok');
+      $('#sp-link').value = '';
+      $('#in-name').value = '';
+      $('#in-cover').value = '';
+      $('#in-date').value = '';
+      $('#in-tracks').value = 1;
+      $('#preview-box').classList.remove('show');
+      $('#pv-img').src = '';
+      $('#pv-title').textContent = '—';
+      $('#pv-artist').textContent = '—';
+
+      showMsg('✅ Release added to the server!', 'ok');
+      renderList();
+    } catch (err) {
+      showMsg('Error: ' + err.message, 'err');
+    }
   });
 
   function showMsg(text, type) {
@@ -366,42 +368,45 @@
     setTimeout(function () { msg.classList.remove('show'); }, 4000);
   }
 
-  function renderList() {
-    var list = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-    var el = $('#release-list');
-    if (!list.length) {
-      el.innerHTML = '<p style="color: var(--muted); font-size: 0.85rem;">No releases added yet.</p>';
-      return;
-    }
-    el.innerHTML = list.map(function (s) {
-      return '' +
-        '<div class="admin-song">' +
-          '<img src="' + (s.cover || '') + '" alt="">' +
-          '<div class="info">' +
-            '<h4>' + s.name + '</h4>' +
-            '<p>' + s.type + ' · ' + s.total_tracks + ' song' + (s.total_tracks > 1 ? 's' : '') + ' · ' + s.release_date + '</p>' +
-          '</div>' +
-          '<button class="del" data-id="' + s.id + '">✕</button>' +
-        '</div>';
-    }).join('');
+  async function renderList() {
+    try {
+      var res = await fetch('/api/songs');
+      var list = await res.json();
+      var el = $('#release-list');
 
-    document.querySelectorAll('.del').forEach(function (b) {
-      b.addEventListener('click', function () {
-        var id = parseInt(b.getAttribute('data-id'), 10);
-        var list = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-        list = list.filter(function (x) { return x.id !== id; });
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
-        renderList();
+      if (!list || !list.length) {
+        el.innerHTML = '<p style="color: var(--muted); font-size: 0.85rem;">No releases added yet.</p>';
+        return;
+      }
+
+      el.innerHTML = list.map(function (s) {
+        return '' +
+          '<div class="admin-song">' +
+            '<img src="' + (s.cover || '') + '" alt="">' +
+            '<div class="info">' +
+              '<h4>' + s.name + '</h4>' +
+              '<p>' + s.type + ' · ' + s.total_tracks + ' song' + (s.total_tracks > 1 ? 's' : '') + ' · ' + s.release_date + '</p>' +
+            '</div>' +
+            '<button class="del" data-id="' + s.id + '">✕</button>' +
+          '</div>';
+      }).join('');
+
+      document.querySelectorAll('.del').forEach(function (b) {
+        b.addEventListener('click', async function () {
+          if (!confirm('Delete this release?')) return;
+          var id = b.getAttribute('data-id');
+          try {
+            await fetch('/api/songs?id=' + id, { method: 'DELETE' });
+            renderList();
+          } catch (err) {
+            alert('Failed to delete: ' + err.message);
+          }
+        });
       });
-    });
-  }
-
-  $('#clear-all').addEventListener('click', function () {
-    if (confirm('Delete all added releases?')) {
-      localStorage.removeItem(STORAGE_KEY);
-      renderList();
+    } catch (err) {
+      console.error('Failed to load releases:', err);
     }
-  });
+  }
 
   checkLogin();
 })();
