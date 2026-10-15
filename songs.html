@@ -436,7 +436,8 @@
   }
 
   function loadSongs() {
-    fetch('/.netlify/functions/update-songs', { cache: 'no-cache' })
+    // fetch('/.netlify/functions/update-songs', { cache: 'no-cache' })
+    fetch('/api/songs', { cache: 'no-cache' })
       .then(function (res) {
         if (!res.ok) throw new Error('HTTP ' + res.status);
         return res.json();
