@@ -56,9 +56,10 @@
 }
 .song-row {
   display: grid;
-  grid-template-columns: 1fr 50px;
+  grid-template-columns: 70px 1fr 50px;
+  gap: 16px;
   align-items: center;
-  padding: 20px 24px;
+  padding: 16px 20px;
   margin-bottom: 10px;
   background: var(--glass-bg);
   backdrop-filter: var(--glass-blur);
@@ -72,11 +73,18 @@
   border-color: var(--red-bright);
   box-shadow: 0 0 28px rgba(139, 0, 0, 0.4);
 }
+.song-cover {
+  width: 70px;
+  height: 70px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid var(--glass-border);
+}
 .song-info h3 {
   font-size: 1rem;
   font-weight: 700;
   color: var(--text-bright);
-  margin-bottom: 2px;
+  margin-bottom: 4px;
 }
 .song-info p {
   font-size: 0.72rem;
@@ -174,28 +182,6 @@
   letter-spacing: 0.15em;
   text-transform: uppercase;
 }
-.status-text.loading::after {
-  content: '';
-  display: inline-block;
-  width: 14px;
-  text-align: left;
-  animation: dots 1.4s steps(4, end) infinite;
-}
-@keyframes dots {
-  0% { content: ''; }
-  25% { content: '.'; }
-  50% { content: '..'; }
-  75% { content: '...'; }
-  100% { content: ''; }
-}
-.last-updated {
-  text-align: center;
-  font-size: 0.68rem;
-  color: var(--muted-dim);
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  margin-top: 20px;
-}
 .songs-note {
   text-align: center;
   margin-top: 50px;
@@ -204,7 +190,8 @@
   letter-spacing: 0.1em;
 }
 @media (max-width: 640px) {
-  .song-row { grid-template-columns: 1fr 44px; padding: 16px; }
+  .song-row { grid-template-columns: 55px 1fr 44px; padding: 14px; gap: 12px; }
+  .song-cover { width: 55px; height: 55px; }
   .song-info h3 { font-size: 0.9rem; }
   .song-info p { font-size: 0.65rem; }
   .song-details { padding: 16px; }
@@ -241,7 +228,7 @@
   <div class="container">
     <p class="section-eyebrow">COMPLETE CATALOG</p>
     <h1 class="section-title">ALL SONGS</h1>
-    <p class="page-sub">Auto-synced with Apple Music · Updated live</p>
+    <p class="page-sub">Updated from admin · Live</p>
   </div>
 </header>
 
@@ -256,10 +243,8 @@
     </div>
 
     <div class="songs-list" id="songs-container">
-      <p class="status-text loading">Loading songs</p>
+      <p class="status-text">Loading songs…</p>
     </div>
-
-    <p class="last-updated" id="last-updated"></p>
 
     <p class="songs-note">Full catalog available on all streaming platforms.</p>
 
@@ -270,6 +255,9 @@
   <div class="container footer-inner">
     <div class="footer-brand">MORIMORSELS <em>JDOT</em></div>
     <p>© 2026 MoriMorsels JDot. All rights reserved.</p>
+    <p style="margin-top: 14px;">
+      <a href="admin.html" style="font-size: 0.72rem; color: var(--muted); letter-spacing: 0.15em; text-transform: uppercase;">Admin</a>
+    </p>
   </div>
 </footer>
 
@@ -279,7 +267,6 @@
 (function () {
   'use strict';
 
-  // Every known platform for MoriMorsels JDot
   var PLATFORMS = [
     { name: 'Spotify',       url: 'https://open.spotify.com/artist/72RLZjzQjhCvtMraxrqVtO' },
     { name: 'Apple Music',   url: 'https://music.apple.com/ng/artist/morimorsels-jdot/1856608319' },
@@ -319,19 +306,10 @@
   function formatType(type) {
     if (!type) return 'Single';
     var t = String(type).toLowerCase();
-    if (t === 'album')   return 'Album';
-    if (t === 'single')  return 'Single';
-    if (t === 'ep')      return 'EP';
-    if (t === 'compilation') return 'Compilation';
+    if (t === 'album')  return 'Album';
+    if (t === 'single') return 'Single';
+    if (t === 'ep')     return 'EP';
     return t.charAt(0).toUpperCase() + t.slice(1);
-  }
-
-  function sortByDateDesc(arr) {
-    return arr.slice().sort(function (a, b) {
-      var da = a.release_date || '1900-01-01';
-      var db = b.release_date || '1900-01-01';
-      return db.localeCompare(da);
-    });
   }
 
   function renderSongs(releases) {
@@ -339,11 +317,13 @@
     if (!container) return;
 
     if (!releases || releases.length === 0) {
-      container.innerHTML = '<p class="status-text">No releases found. Check back soon.</p>';
+      container.innerHTML = '<p class="status-text">No releases yet. Check back soon.</p>';
       return;
     }
 
-    var sorted = sortByDateDesc(releases);
+    var sorted = releases.slice().sort(function (a, b) {
+      return (b.release_date || '').localeCompare(a.release_date || '');
+    });
     var latestName = sorted[0] ? sorted[0].name : null;
 
     container.innerHTML = sorted.map(function (song) {
@@ -355,8 +335,13 @@
         return '<a href="' + escapeHtml(url) + '" target="_blank" rel="noopener">' + escapeHtml(p.name) + '</a>';
       }).join('');
 
+      var coverHtml = song.cover
+        ? '<img class="song-cover" src="' + escapeHtml(song.cover) + '" alt="">'
+        : '<div class="song-cover" style="background:linear-gradient(135deg,#5c0000,#2a0000);"></div>';
+
       return '' +
         '<div class="song-row" data-type="' + escapeHtml(type) + '">' +
+          coverHtml +
           '<div class="song-info">' +
             '<h3>' +
               escapeHtml(song.name) +
@@ -387,7 +372,6 @@
         if (!details || !details.classList.contains('song-details')) return;
 
         var isOpen = details.classList.contains('open');
-
         $$('.song-details.open').forEach(function (d) { d.classList.remove('open'); });
         $$('.song-expand.open').forEach(function (b) { b.classList.remove('open'); });
 
@@ -436,28 +420,11 @@
   }
 
   function loadSongs() {
-    // fetch('/.netlify/functions/update-songs', { cache: 'no-cache' })
-    fetch('/api/songs', { cache: 'no-cache' })
-      .then(function (res) {
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        return res.json();
-      })
-      .then(function (data) {
-        var releases = Array.isArray(data) ? data : (data.releases || []);
-        renderSongs(releases);
-        var updated = data.lastUpdated ? new Date(data.lastUpdated) : null;
-        if (updated) {
-          var el = $('#last-updated');
-          if (el) el.textContent = 'Last synced: ' + updated.toLocaleString();
-        }
-      })
-      .catch(function (err) {
-        console.warn('Failed to load songs:', err.message);
-        var container = $('#songs-container');
-        if (container) {
-          container.innerHTML = '<p class="status-text">Could not load songs. Try again shortly.</p>';
-        }
-      });
+    var stored = [];
+    try {
+      stored = JSON.parse(localStorage.getItem('mmjd_releases') || '[]');
+    } catch (e) { stored = []; }
+    renderSongs(stored);
   }
 
   if (document.readyState === 'loading') {

@@ -52,7 +52,6 @@
       <div class="album-frame">
         <div class="frame-glow"></div>
         <img src="/image/Copy of Untitled Design.png" alt="MoriMorsels JDot" class="hero-art">
-        <!-- <img src="https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/c2/54/a7/c254a77c-7eb1-c2e0-4940-63665d284cb4/5064042357039_cover.jpg/316x316bb.webp" alt="MoriMorsels JDot" class="hero-art"> -->
       </div>
     </div>
   </div>
@@ -64,24 +63,16 @@
       <p class="section-eyebrow">LATEST RELEASE</p>
       <h2 class="section-title">FEATURED</h2>
     </div>
-    <div class="latest-release-card">
+    <div class="latest-release-card" id="featured-card">
       <div class="latest-art">
-        <img src="https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/c2/54/a7/c254a77c-7eb1-c2e0-4940-63665d284cb4/5064042357039_cover.jpg/316x316bb.webp" alt="Latest Release">
+        <img id="featured-img" src="" alt="Latest Release">
       </div>
       <div class="latest-info">
         <span class="latest-badge">LATEST</span>
-        <h3>boutthat*</h3>
-        <p class="latest-type">Single · 1 Song</p>
-        <p class="latest-date">Released September 10, 2026</p>
-        <div class="latest-platforms">
-          <a href="https://open.spotify.com/artist/72RLZjzQjhCvtMraxrqVtO" target="_blank" class="platform-btn">Spotify</a>
-          <a href="https://music.apple.com/ng/artist/morimorsels-jdot/1856608319" target="_blank" class="platform-btn">Apple Music</a>
-          <a href="https://soundcloud.com/morimorselsjdot" target="_blank" class="platform-btn">SoundCloud</a>
-          <a href="https://audiomack.com/morimorselsjdot" target="_blank" class="platform-btn">Audiomack</a>
-          <a href="https://music.youtube.com/channel/UCU2dxCVjy_6nW7Pyjbgl-IA" target="_blank" class="platform-btn">YouTube Music</a>
-          <a href="https://www.boomplay.com/artists/116625599" target="_blank" class="platform-btn">Boomplay</a>
-          <a href="https://www.qobuz.com/us-en/interpreter/morimorsels-jdot/29626063" target="_blank" class="platform-btn">Qobuz</a>
-        </div>
+        <h3 id="featured-title">Loading…</h3>
+        <p class="latest-type" id="featured-type">—</p>
+        <p class="latest-date" id="featured-date">—</p>
+        <div class="latest-platforms" id="featured-platforms"></div>
         <a href="songs.html" class="btn btn-primary small">View All Songs →</a>
       </div>
     </div>
@@ -92,9 +83,106 @@
   <div class="container footer-inner">
     <div class="footer-brand">MORIMORSELS <em>JDOT</em></div>
     <p>© 2026 MoriMorsels JDot. All rights reserved.</p>
+    <p style="margin-top: 14px;">
+      <a href="admin.html" style="font-size: 0.72rem; color: var(--muted); letter-spacing: 0.15em; text-transform: uppercase;">Admin</a>
+    </p>
   </div>
 </footer>
 
 <script src="script.js"></script>
+
+<script>
+(function () {
+  'use strict';
+
+  var PLATFORMS = [
+    { name: 'Spotify',       url: 'https://open.spotify.com/artist/72RLZjzQjhCvtMraxrqVtO' },
+    { name: 'Apple Music',   url: 'https://music.apple.com/ng/artist/morimorsels-jdot/1856608319' },
+    { name: 'SoundCloud',    url: 'https://soundcloud.com/morimorselsjdot' },
+    { name: 'Audiomack',     url: 'https://audiomack.com/morimorselsjdot' },
+    { name: 'YouTube Music', url: 'https://music.youtube.com/channel/UCU2dxCVjy_6nW7Pyjbgl-IA' },
+    { name: 'Boomplay',      url: 'https://www.boomplay.com/artists/116625599' },
+    { name: 'Qobuz',         url: 'https://www.qobuz.com/us-en/interpreter/morimorsels-jdot/29626063' }
+  ];
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function formatDate(dateStr) {
+    if (!dateStr) return '';
+    var parts = String(dateStr).split('-');
+    var year = parts[0];
+    var month = parts[1] ? parseInt(parts[1], 10) : 1;
+    var day = parts[2] ? parseInt(parts[2], 10) : null;
+    var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    var m = months[(month - 1 + 12) % 12] || 'January';
+    return day ? (m + ' ' + day + ', ' + year) : (m + ' ' + year);
+  }
+
+  function formatType(type) {
+    if (!type) return 'Single';
+    var t = String(type).toLowerCase();
+    if (t === 'album')  return 'Album';
+    if (t === 'single') return 'Single';
+    if (t === 'ep')     return 'EP';
+    return t.charAt(0).toUpperCase() + t.slice(1);
+  }
+
+  function loadFeatured() {
+    var list = [];
+    try {
+      list = JSON.parse(localStorage.getItem('mmjd_releases') || '[]');
+    } catch (e) { list = []; }
+
+    // Sort newest first
+    list.sort(function (a, b) {
+      return (b.release_date || '').localeCompare(a.release_date || '');
+    });
+
+    var card = document.getElementById('featured-card');
+    if (!card) return;
+
+    if (list.length === 0) {
+      document.getElementById('featured-title').textContent = 'No releases yet';
+      document.getElementById('featured-type').textContent = '—';
+      document.getElementById('featured-date').textContent = '—';
+      document.getElementById('featured-img').style.display = 'none';
+      return;
+    }
+
+    var s = list[0];
+    document.getElementById('featured-img').src = s.cover || '';
+    document.getElementById('featured-title').textContent = s.name || 'Untitled';
+    document.getElementById('featured-type').textContent =
+      formatType(s.type) + ' · ' + (s.total_tracks || 1) +
+      ' Song' + ((s.total_tracks || 1) > 1 ? 's' : '');
+    document.getElementById('featured-date').textContent =
+      'Released ' + formatDate(s.release_date);
+
+    // Platforms
+    var platEl = document.getElementById('featured-platforms');
+    platEl.innerHTML = PLATFORMS.map(function (p) {
+      var url = p.url;
+      if (p.name === 'Apple Music' && s.apple_url) url = s.apple_url;
+      return '<a href="' + escapeHtml(url) + '" target="_blank" rel="noopener" class="platform-btn">' +
+        escapeHtml(p.name) + '</a>';
+    }).join('');
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadFeatured);
+  } else {
+    loadFeatured();
+  }
+})();
+</script>
+
 </body>
 </html>

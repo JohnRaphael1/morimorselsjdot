@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin | MoriMorsels JDot</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+.admin-wrap { max-width: 720px; margin: 0 auto; }
+.admin-card {
+  background: var(--glass-bg-strong);
+  backdrop-filter: var(--glass-blur-strong);
+  -webkit-backdrop-filter: var(--glass-blur-strong);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  padding: 40px;
+  box-shadow: 0 0 40px rgba(139, 0, 0, 0.2);
+}
+.admin-card h2 {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  margin-bottom: 24px;
+  color: var(--text-bright);
+}
+.admin-input {
+  width: 100%;
+  padding: 14px 16px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  color: #fff;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  transition: all 0.3s var(--ease);
+}
+.admin-input:focus {
+  outline: none;
+  border-color: var(--red-bright);
+  box-shadow: 0 0 20px rgba(139, 0, 0, 0.45);
+}
+.admin-label {
+  display: block;
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--red-bright);
+  margin-bottom: 8px;
+  margin-top: 18px;
+}
+.admin-msg {
+  padding: 14px;
+  border-radius: 8px;
+  margin-top: 20px;
+  font-size: 0.85rem;
+  display: none;
+}
+.admin-msg.show { display: block; }
+.admin-msg.ok {
+  background: rgba(0, 128, 0, 0.15);
+  border: 1px solid #0a5c0a;
+  color: #7fdc7f;
+}
+.admin-msg.err {
+  background: rgba(139, 0, 0, 0.15);
+  border: 1px solid var(--red-1);
+  color: #ff9e9e;
+}
+.admin-list {
+  margin-top: 40px;
+  border-top: 1px solid var(--glass-border);
+  padding-top: 30px;
+}
+.admin-song {
+  display: grid;
+  grid-template-columns: 60px 1fr auto;
+  gap: 16px;
+  align-items: center;
+  padding: 14px;
+  margin-bottom: 10px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 10px;
+}
+.admin-song img {
+  width: 60px; height: 60px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+.admin-song .info h4 { color: #fff; font-size: 0.9rem; margin-bottom: 3px; }
+.admin-song .info p { color: var(--muted); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; }
+.admin-song .del {
+  background: rgba(139, 0, 0, 0.3);
+  border: 1px solid var(--red-1);
+  color: #ff9e9e;
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.3s;
+}
+.admin-song .del:hover {
+  background: var(--red-bright);
+  color: #fff;
+}
+.preview-box {
+  display: none;
+  margin-top: 20px;
+  padding: 18px;
+  border-radius: 10px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  gap: 16px;
+  align-items: center;
+}
+.preview-box.show { display: flex; }
+.preview-box img { width: 80px; height: 80px; border-radius: 8px; object-fit: cover; }
+.preview-box .pv-info h4 { color: #fff; font-size: 1rem; margin-bottom: 4px; }
+.preview-box .pv-info p { color: var(--muted); font-size: 0.75rem; }
+.logout-btn {
+  position: fixed; top: 80px; right: 24px;
+  z-index: 500;
+}
+.row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media (max-width: 640px) {
+  .admin-card { padding: 24px; }
+  .admin-song { grid-template-columns: 50px 1fr auto; }
+  .admin-song img { width: 50px; height: 50px; }
+  .row-2 { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="bg-layer bg-gradient"></div>
+<div class="bg-layer bg-glow"></div>
+<div class="bg-layer bg-noise"></div>
+<canvas id="particles"></canvas>
+
+<nav class="navbar">
+  <div class="nav-container">
+    <a href="index.html" class="nav-logo">
+      <span class="logo-mark">M</span>
+      <span class="logo-text">MORIMORSELS <em>JDOT</em></span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="music.html">Music</a></li>
+      <li><a href="videos.html">Videos</a></li>
+      <li><a href="songs.html">All Songs</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="contact.html">Contact</a></li>
+    </ul>
+    <button class="nav-toggle" aria-label="Menu">☰</button>
+  </div>
+</nav>
+
+<div id="login-screen" class="section" style="padding-top: 140px;">
+  <div class="container">
+    <div class="admin-wrap">
+      <div class="admin-card">
+        <h2>Admin Login</h2>
+        <label class="admin-label">Login ID</label>
+        <input id="login-id" class="admin-input" type="text" placeholder="Enter login ID">
+        <label class="admin-label">Password</label>
+        <input id="login-pass" class="admin-input" type="password" placeholder="Enter password">
+        <button id="login-btn" class="btn btn-primary full" style="margin-top: 20px;">Login</button>
+        <div id="login-msg" class="admin-msg err"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="admin-panel" class="section" style="padding-top: 140px; display: none;">
+  <div class="container">
+    <div class="admin-wrap">
+      <div class="admin-card">
+        <h2>Add a Release</h2>
+
+        <label class="admin-label">Spotify Link (optional)</label>
+        <input id="sp-link" class="admin-input" type="text" placeholder="https://open.spotify.com/album/...">
+        <button id="preview-btn" class="btn btn-outline full" style="margin-top: 14px;">Auto-fetch from Spotify</button>
+
+        <div id="preview-box" class="preview-box">
+          <img id="pv-img" src="" alt="">
+          <div class="pv-info">
+            <h4 id="pv-title">—</h4>
+            <p id="pv-artist">—</p>
+          </div>
+        </div>
+
+        <label class="admin-label">Release Name *</label>
+        <input id="in-name" class="admin-input" type="text" placeholder="Song / EP / Album name">
+
+        <label class="admin-label">Artist</label>
+        <input id="in-artist" class="admin-input" type="text" placeholder="MoriMorsels JDot" value="MoriMorsels JDot">
+
+        <label class="admin-label">Cover Image URL *</label>
+        <input id="in-cover" class="admin-input" type="text" placeholder="https://... (paste image URL)">
+
+        <div class="row-2">
+          <div>
+            <label class="admin-label">Release Date *</label>
+            <input id="in-date" class="admin-input" type="date">
+          </div>
+          <div>
+            <label class="admin-label">Type *</label>
+            <select id="in-type" class="admin-input">
+              <option value="single">Single</option>
+              <option value="ep">EP</option>
+              <option value="album">Album</option>
+            </select>
+          </div>
+        </div>
+
+        <label class="admin-label">Number of Songs *</label>
+        <input id="in-tracks" class="admin-input" type="number" min="1" value="1">
+
+        <button id="add-btn" class="btn btn-primary full" style="margin-top: 24px;">Add Release</button>
+
+        <div id="admin-msg" class="admin-msg"></div>
+      </div>
+
+      <div class="admin-list">
+        <h2 style="font-family: var(--font-display); color: #fff; text-transform: uppercase; margin-bottom: 20px;">Added Releases</h2>
+        <div id="release-list"></div>
+        <button id="clear-all" class="btn btn-outline full" style="margin-top: 20px; border-color: #500; color: #ff9e9e;">Clear All</button>
+      </div>
+
+      <button id="logout-btn" class="btn btn-outline logout-btn">Logout</button>
+    </div>
+  </div>
+</div>
+
+<footer class="footer" style="margin-top: 80px;">
+  <div class="container footer-inner">
+    <div class="footer-brand">MORIMORSELS <em>JDOT</em></div>
+    <p>© 2026 MoriMorsels JDot. All rights reserved.</p>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+
+<script>
+(function () {
+  'use strict';
+
+  var ADMIN_ID = 'MMJD2026';
+  var ADMIN_PASS = 'MMJDOT';
+  var STORAGE_KEY = 'mmjd_releases';
+
+  var $ = function (s) { return document.querySelector(s); };
+
+  function checkLogin() {
+    if (localStorage.getItem('mmjd_logged') === 'yes') {
+      showPanel();
+    }
+  }
+
+  $('#login-btn').addEventListener('click', function () {
+    var id = $('#login-id').value.trim();
+    var pw = $('#login-pass').value.trim();
+    if (id === ADMIN_ID && pw === ADMIN_PASS) {
+      localStorage.setItem('mmjd_logged', 'yes');
+      showPanel();
+    } else {
+      var msg = $('#login-msg');
+      msg.textContent = 'Wrong login ID or password.';
+      msg.className = 'admin-msg err show';
+    }
+  });
+
+  function showPanel() {
+    $('#login-screen').style.display = 'none';
+    $('#admin-panel').style.display = 'block';
+    renderList();
+  }
+
+  $('#logout-btn').addEventListener('click', function () {
+    localStorage.removeItem('mmjd_logged');
+    location.reload();
+  });
+
+  // Auto-fetch from Spotify oEmbed
+  $('#preview-btn').addEventListener('click', function () {
+    var link = $('#sp-link').value.trim();
+    if (!link) {
+      showMsg('Paste a Spotify link first.', 'err');
+      return;
+    }
+    fetch('https://open.spotify.com/oembed?url=' + encodeURIComponent(link))
+      .then(function (r) {
+        if (!r.ok) throw new Error('Spotify could not read this link');
+        return r.json();
+      })
+      .then(function (data) {
+        $('#pv-img').src = data.thumbnail_url || '';
+        $('#pv-title').textContent = data.title || '—';
+        $('#pv-artist').textContent = data.author_name || '—';
+        $('#preview-box').classList.add('show');
+
+        // Auto-fill form fields
+        if (data.title) $('#in-name').value = data.title;
+        if (data.author_name) $('#in-artist').value = data.author_name;
+        if (data.thumbnail_url) $('#in-cover').value = data.thumbnail_url;
+
+        showMsg('Fetched. Check the fields and add more info if needed.', 'ok');
+      })
+      .catch(function (err) {
+        showMsg('Could not fetch from Spotify: ' + err.message, 'err');
+      });
+  });
+
+  $('#add-btn').addEventListener('click', function () {
+    var name = $('#in-name').value.trim();
+    var artist = $('#in-artist').value.trim() || 'MoriMorsels JDot';
+    var cover = $('#in-cover').value.trim();
+    var date = $('#in-date').value;
+    var type = $('#in-type').value;
+    var tracks = parseInt($('#in-tracks').value, 10) || 1;
+    var link = $('#sp-link').value.trim();
+
+    if (!name || !date) {
+      showMsg('Name and release date are required.', 'err');
+      return;
+    }
+
+    var list = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    list.push({
+      id: Date.now(),
+      name: name,
+      artist: artist,
+      type: type,
+      release_date: date,
+      total_tracks: tracks,
+      cover: cover,
+      spotify_url: link,
+      added: new Date().toISOString()
+    });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+
+    // Reset
+    $('#sp-link').value = '';
+    $('#in-name').value = '';
+    $('#in-cover').value = '';
+    $('#in-date').value = '';
+    $('#in-tracks').value = 1;
+    $('#preview-box').classList.remove('show');
+    $('#pv-img').src = '';
+    $('#pv-title').textContent = '—';
+    $('#pv-artist').textContent = '—';
+
+    renderList();
+    showMsg('Release added.', 'ok');
+  });
+
+  function showMsg(text, type) {
+    var msg = $('#admin-msg');
+    msg.textContent = text;
+    msg.className = 'admin-msg ' + type + ' show';
+    setTimeout(function () { msg.classList.remove('show'); }, 4000);
+  }
+
+  function renderList() {
+    var list = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    var el = $('#release-list');
+    if (!list.length) {
+      el.innerHTML = '<p style="color: var(--muted); font-size: 0.85rem;">No releases added yet.</p>';
+      return;
+    }
+    el.innerHTML = list.map(function (s) {
+      return '' +
+        '<div class="admin-song">' +
+          '<img src="' + (s.cover || '') + '" alt="">' +
+          '<div class="info">' +
+            '<h4>' + s.name + '</h4>' +
+            '<p>' + s.type + ' · ' + s.total_tracks + ' song' + (s.total_tracks > 1 ? 's' : '') + ' · ' + s.release_date + '</p>' +
+          '</div>' +
+          '<button class="del" data-id="' + s.id + '">✕</button>' +
+        '</div>';
+    }).join('');
+
+    document.querySelectorAll('.del').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var id = parseInt(b.getAttribute('data-id'), 10);
+        var list = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        list = list.filter(function (x) { return x.id !== id; });
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+        renderList();
+      });
+    });
+  }
+
+  $('#clear-all').addEventListener('click', function () {
+    if (confirm('Delete all added releases?')) {
+      localStorage.removeItem(STORAGE_KEY);
+      renderList();
+    }
+  });
+
+  checkLogin();
+})();
+</script>
+
+</body>
+</html>
