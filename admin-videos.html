@@ -11,46 +11,123 @@
 <style>
 .admin-wrap { max-width: 720px; margin: 0 auto; }
 .admin-card {
-  background: var(--glass-bg-strong); backdrop-filter: var(--glass-blur-strong); -webkit-backdrop-filter: var(--glass-blur-strong);
-  border: 1px solid var(--glass-border); border-radius: var(--radius); padding: 36px;
+  background: var(--glass-bg-strong);
+  backdrop-filter: var(--glass-blur-strong);
+  -webkit-backdrop-filter: var(--glass-blur-strong);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  padding: 36px;
   box-shadow: 0 0 40px rgba(139, 0, 0, 0.2);
 }
-.admin-card h2 { font-family: var(--font-display); font-size: 1.6rem; letter-spacing: 0.03em; text-transform: uppercase; margin-bottom: 24px; color: var(--text-bright); }
+.admin-card h2 {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  margin-bottom: 24px;
+  color: var(--text-bright);
+}
 .admin-input {
-  width: 100%; padding: 13px 16px; background: rgba(0, 0, 0, 0.5);
-  border: 1px solid var(--glass-border); border-radius: 8px; color: #fff;
-  font-family: var(--font-body); font-size: 0.9rem;
+  width: 100%;
+  padding: 13px 16px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  color: #fff;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
 }
-.admin-input:focus { outline: none; border-color: var(--red-bright); box-shadow: 0 0 20px rgba(139, 0, 0, 0.45); }
+.admin-input:focus {
+  outline: none;
+  border-color: var(--red-bright);
+  box-shadow: 0 0 20px rgba(139, 0, 0, 0.45);
+}
 .admin-label {
-  display: block; font-size: 0.62rem; font-weight: 800; letter-spacing: 0.22em;
-  text-transform: uppercase; color: var(--red-bright); margin-bottom: 8px; margin-top: 18px;
+  display: block;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--red-bright);
+  margin-bottom: 8px;
+  margin-top: 18px;
 }
-.admin-msg { padding: 14px; border-radius: 8px; margin-top: 20px; font-size: 0.85rem; display: none; }
+.admin-msg {
+  padding: 14px;
+  border-radius: 8px;
+  margin-top: 20px;
+  font-size: 0.85rem;
+  display: none;
+}
 .admin-msg.show { display: block; }
 .admin-msg.ok { background: rgba(0, 128, 0, 0.15); border: 1px solid #0a5c0a; color: #7fdc7f; }
 .admin-msg.err { background: rgba(139, 0, 0, 0.15); border: 1px solid var(--red-1); color: #ff9e9e; }
 .preview-box {
-  display: none; margin-top: 20px; padding: 18px; border-radius: 10px;
-  background: var(--glass-bg); border: 1px solid var(--glass-border);
-  flex-direction: column; gap: 14px;
+  display: none;
+  margin-top: 20px;
+  padding: 18px;
+  border-radius: 10px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  flex-direction: column;
+  gap: 14px;
 }
 .preview-box.show { display: flex; }
 .preview-box iframe { width: 100%; aspect-ratio: 16/9; border-radius: 8px; border: 0; }
 .vid-list { margin-top: 40px; border-top: 1px solid var(--glass-border); padding-top: 30px; }
 .vid-item {
-  display: grid; grid-template-columns: 80px 1fr auto; gap: 14px; align-items: center;
-  padding: 12px; margin-bottom: 10px; background: var(--glass-bg);
-  border: 1px solid var(--glass-border); border-radius: 10px;
+  display: grid;
+  grid-template-columns: 80px 1fr auto;
+  gap: 14px;
+  align-items: center;
+  padding: 12px;
+  margin-bottom: 10px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 10px;
 }
 .vid-item img { width: 80px; height: 60px; border-radius: 6px; object-fit: cover; background: #111; }
 .vid-item .info h4 { color: #fff; font-size: 0.85rem; margin-bottom: 3px; }
 .vid-item .info p { color: var(--muted); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; }
 .vid-item .del {
-  background: rgba(139, 0, 0, 0.3); border: 1px solid var(--red-1); color: #ff9e9e;
-  width: 34px; height: 34px; border-radius: 50%; cursor: pointer;
+  background: rgba(139, 0, 0, 0.3);
+  border: 1px solid var(--red-1);
+  color: #ff9e9e;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  cursor: pointer;
 }
 .vid-item .del:hover { background: var(--red-bright); color: #fff; }
+
+/* Admin sub-nav */
+.admin-nav { display: flex; gap: 10px; margin-bottom: 24px; flex-wrap: wrap; }
+.admin-nav a {
+  flex: 1;
+  min-width: 140px;
+  text-align: center;
+  padding: 12px 16px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  transition: all 0.3s var(--ease);
+}
+.admin-nav a:hover { color: #fff; border-color: var(--red-1); }
+.admin-nav a.active {
+  background: var(--red-1);
+  color: #fff;
+  border-color: var(--red-bright);
+  box-shadow: 0 0 22px var(--red-glow);
+}
+@media (max-width: 640px) {
+  .admin-card { padding: 22px; }
+  .admin-nav a { min-width: 100%; }
+}
 </style>
 </head>
 <body>
@@ -70,11 +147,11 @@
       <li><a href="index.html">Home</a></li>
       <li><a href="music.html">Music</a></li>
       <li><a href="videos.html">Videos</a></li>
-      <li><a href="songs.html">All Songs</a></li>
       <li><a href="gallery.html">Gallery</a></li>
+      <li><a href="songs.html">All Songs</a></li>
       <li><a href="about.html">About</a></li>
       <li><a href="contact.html">Contact</a></li>
-      <li><a href="admin.html">Admin</a></li>
+      <li><a href="admin.html" class="active">Admin</a></li>
     </ul>
     <button class="nav-toggle" aria-label="Menu">☰</button>
   </div>
@@ -83,6 +160,13 @@
 <div class="section" style="padding-top: 140px;">
   <div class="container">
     <div class="admin-wrap">
+
+      <div class="admin-nav">
+        <a href="admin.html">Songs</a>
+        <a href="admin-videos.html" class="active">Videos</a>
+        <a href="admin-gallery.html">Gallery</a>
+      </div>
+
       <div class="admin-card">
         <h2>Add a Video</h2>
 
@@ -193,7 +277,6 @@
     currentEmbed = embedData.html;
     currentThumb = embedData.thumb;
 
-    // Auto-fetch title for YouTube
     if (platform === 'youtube') {
       try {
         var oRes = await fetch('https://www.youtube.com/oembed?url=' + encodeURIComponent(url) + '&format=json');
@@ -203,7 +286,7 @@
           if (oData.thumbnail_url) currentThumb = oData.thumbnail_url;
         }
       } catch (e) {
-        // Silent — YouTube title not fetched
+        // Silent
       }
     }
 

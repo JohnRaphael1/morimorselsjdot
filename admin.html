@@ -116,8 +116,40 @@
   font-size: 0.8rem;
 }
 .track-list-preview li::before { content: '♪ '; color: var(--red-bright); }
+
+/* Admin sub-nav */
+.admin-nav {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+.admin-nav a {
+  flex: 1;
+  min-width: 140px;
+  text-align: center;
+  padding: 12px 16px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  transition: all 0.3s var(--ease);
+}
+.admin-nav a:hover { color: #fff; border-color: var(--red-1); }
+.admin-nav a.active {
+  background: var(--red-1);
+  color: #fff;
+  border-color: var(--red-bright);
+  box-shadow: 0 0 22px var(--red-glow);
+}
+
 @media (max-width: 640px) {
   .admin-card { padding: 22px; }
+  .admin-nav a { min-width: 100%; }
 }
 </style>
 </head>
@@ -148,6 +180,7 @@
   </div>
 </nav>
 
+<!-- LOGIN SCREEN -->
 <div id="login-screen" class="section" style="padding-top: 140px;">
   <div class="container">
     <div class="admin-wrap">
@@ -164,9 +197,18 @@
   </div>
 </div>
 
+<!-- ADMIN PANEL -->
 <div id="admin-panel" class="section" style="padding-top: 140px; display: none;">
   <div class="container">
     <div class="admin-wrap">
+
+      <!-- Quick nav between admin sections -->
+      <div class="admin-nav">
+        <a href="admin.html" class="active">Songs</a>
+        <a href="admin-videos.html">Videos</a>
+        <a href="admin-gallery.html">Gallery</a>
+      </div>
+
       <div class="admin-card">
         <h2>Add a Release</h2>
 
@@ -191,7 +233,7 @@
         <div id="admin-msg" class="admin-msg"></div>
 
         <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--glass-border);">
-          <p style="font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em;">Manual fields (if needed)</p>
+          <p style="font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em;">Optional details</p>
           <label class="admin-label">Producer</label>
           <input id="in-producer" class="admin-input" type="text" placeholder="Producer name">
           <label class="admin-label">Record Label</label>
@@ -199,9 +241,11 @@
           <label class="admin-label">Genre</label>
           <input id="in-genre" class="admin-input" type="text" placeholder="e.g. Drill, Trap, Hip-Hop">
         </div>
+
+        <button id="logout-btn" class="btn btn-outline full" style="margin-top: 30px; border-color: #500; color: #ff9e9e;">Logout</button>
       </div>
 
-      <div class="admin-list" style="margin-top: 40px;">
+      <div style="margin-top: 40px;">
         <h2 style="font-family: var(--font-display); color: #fff; text-transform: uppercase; margin-bottom: 20px;">Added Releases</h2>
         <div id="release-list"></div>
       </div>
@@ -220,10 +264,12 @@
 
   var $ = function (s) { return document.querySelector(s); };
 
+  // Restore session
   if (localStorage.getItem('mmjd_logged') === 'yes') {
     showPanel();
   }
 
+  // Login
   $('#login-btn').addEventListener('click', function () {
     var id = $('#login-id').value.trim();
     var pw = $('#login-pass').value.trim();
@@ -242,6 +288,12 @@
     $('#admin-panel').style.display = 'block';
     renderList();
   }
+
+  // Logout
+  $('#logout-btn').addEventListener('click', function () {
+    localStorage.removeItem('mmjd_logged');
+    location.reload();
+  });
 
   // ---------- AUTO FETCH ----------
   $('#fetch-btn').addEventListener('click', async function () {
@@ -277,7 +329,7 @@
         $('#tracklist-preview').style.display = 'none';
       }
 
-      // Auto-save
+      // Save
       var saveRes = await fetch('/api/songs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -294,7 +346,7 @@
           apple_url: url.includes('apple') ? url : '',
           producer: $('#in-producer').value.trim(),
           label: $('#in-label').value.trim(),
-          genre: $('#in-genre').value.trim(),
+          genre: $('#in-genre').value.trim()
         })
       });
 
