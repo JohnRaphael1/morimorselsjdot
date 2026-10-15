@@ -8,8 +8,37 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;600;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<style>
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+.gallery-item {
+  position: relative; overflow: hidden; border-radius: var(--radius);
+  border: 1px solid var(--glass-border);
+  background: #111;
+  aspect-ratio: 1;
+  transition: all 0.35s var(--ease);
+  cursor: pointer;
+}
+.gallery-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s var(--ease); }
+.gallery-item:hover { border-color: var(--red-bright); box-shadow: 0 0 35px rgba(139, 0, 0, 0.55); }
+.gallery-item:hover img { transform: scale(1.06); }
+.gallery-caption {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  padding: 16px;
+  background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+  color: #fff; font-size: 0.8rem; font-weight: 600;
+  opacity: 0; transition: opacity 0.3s;
+}
+.gallery-item:hover .gallery-caption { opacity: 1; }
+.status-text { text-align: center; padding: 60px 20px; color: var(--muted); font-size: 0.85rem; letter-spacing: 0.15em; text-transform: uppercase; }
+@media (max-width: 640px) { .gallery-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; } }
+</style>
 </head>
 <body>
+
 <div class="bg-layer bg-gradient"></div>
 <div class="bg-layer bg-glow"></div>
 <div class="bg-layer bg-noise"></div>
@@ -17,15 +46,19 @@
 
 <nav class="navbar">
   <div class="nav-container">
-    <a href="index.html" class="nav-logo"><span class="logo-mark">M</span><span class="logo-text">MORIMORSELS <em>JDOT</em></span></a>
+    <a href="index.html" class="nav-logo">
+      <span class="logo-mark">M</span>
+      <span class="logo-text">MORIMORSELS <em>JDOT</em></span>
+    </a>
     <ul class="nav-links">
       <li><a href="index.html">Home</a></li>
       <li><a href="music.html">Music</a></li>
       <li><a href="videos.html">Videos</a></li>
+      <li><a href="gallery.html">Gallery</a></li>
       <li><a href="songs.html">All Songs</a></li>
-      <li><a href="gallery.html" class="active">Gallery</a></li>
       <li><a href="about.html">About</a></li>
       <li><a href="contact.html">Contact</a></li>
+      <li><a href="admin.html">Admin</a></li>
     </ul>
     <button class="nav-toggle" aria-label="Menu">☰</button>
   </div>
@@ -41,52 +74,56 @@
 
 <section class="section">
   <div class="container">
-    <div class="gallery-grid">
-      <div class="gallery-item tall">
-        <img src="PASTE_STUDIO_PHOTO" alt="Studio session" onerror="this.style.display='none'">
-        <div class="g-fallback">STUDIO<br>SESSION</div>
-      </div>
-      <div class="gallery-item">
-        <img src="PASTE_MIC_PHOTO" alt="On the mic" onerror="this.style.display='none'">
-        <div class="g-fallback">ON<br>THE<br>MIC</div>
-      </div>
-      <div class="gallery-item">
-        <img src="PASTE_LAGOS_PHOTO" alt="Lagos nights" onerror="this.style.display='none'">
-        <div class="g-fallback">LAGOS<br>NIGHTS</div>
-      </div>
-      <div class="gallery-item wide">
-        <img src="PASTE_MORSELS_COVER" alt="MORSELS MODE cover" onerror="this.style.display='none'">
-        <div class="g-fallback">COVER · MORSELS MODE</div>
-      </div>
-      <div class="gallery-item">
-        <img src="PASTE_BACKSTAGE_PHOTO" alt="Backstage" onerror="this.style.display='none'">
-        <div class="g-fallback">BACKSTAGE</div>
-      </div>
-      <div class="gallery-item tall">
-        <img src="PASTE_BOOTH_PHOTO" alt="In the booth" onerror="this.style.display='none'">
-        <div class="g-fallback">IN THE<br>BOOTH</div>
-      </div>
-      <div class="gallery-item">
-        <img src="PASTE_STREET_PHOTO" alt="Street runner" onerror="this.style.display='none'">
-        <div class="g-fallback">STREET<br>RUNNER</div>
-      </div>
-      <div class="gallery-item wide">
-        <img src="PASTE_CHOPPA_COVER" alt="Choppa cover" onerror="this.style.display='none'">
-        <div class="g-fallback">COVER · CHOPPA</div>
-      </div>
-    </div>
-    <div class="see-more-wrap">
-      <a href="https://www.instagram.com/official_morimorselsjdot" target="_blank" rel="noopener" class="btn btn-outline">See More on Instagram →</a>
+    <div class="gallery-grid" id="gallery-container">
+      <p class="status-text">Loading…</p>
     </div>
   </div>
 </section>
 
-<footer class="footer">
-  <div class="container footer-inner">
-    <div class="footer-brand">MORIMORSELS <em>JDOT</em></div>
-    <p>© 2026 MoriMorsels JDot. All rights reserved.</p>
-  </div>
-</footer>
 <script src="script.js"></script>
+
+<script>
+(function () {
+  'use strict';
+
+  if (localStorage.getItem('mmjd_logged') === 'yes') {
+    var a = document.getElementById('nav-admin');
+    if (a) a.style.display = '';
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+
+  async function load() {
+    var container = document.getElementById('gallery-container');
+    try {
+      var res = await fetch('/api/gallery');
+      var images = await res.json();
+      if (!images || !images.length) {
+        container.innerHTML = '<p class="status-text">No photos yet.</p>';
+        return;
+      }
+      container.innerHTML = images.slice().reverse().map(function (img) {
+        return '' +
+          '<div class="gallery-item">' +
+            '<img src="' + escapeHtml(img.image) + '" alt="' + escapeHtml(img.caption || '') + '" loading="lazy">' +
+            (img.caption ? '<div class="gallery-caption">' + escapeHtml(img.caption) + '</div>' : '') +
+          '</div>';
+      }).join('');
+    } catch (err) {
+      container.innerHTML = '<p class="status-text">Could not load gallery.</p>';
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', load);
+  } else {
+    load();
+  }
+})();
+</script>
+
 </body>
 </html>

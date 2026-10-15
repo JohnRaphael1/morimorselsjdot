@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Videos | MoriMorsels JDot</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+.admin-wrap { max-width: 720px; margin: 0 auto; }
+.admin-card {
+  background: var(--glass-bg-strong); backdrop-filter: var(--glass-blur-strong); -webkit-backdrop-filter: var(--glass-blur-strong);
+  border: 1px solid var(--glass-border); border-radius: var(--radius); padding: 36px;
+  box-shadow: 0 0 40px rgba(139, 0, 0, 0.2);
+}
+.admin-card h2 { font-family: var(--font-display); font-size: 1.6rem; letter-spacing: 0.03em; text-transform: uppercase; margin-bottom: 24px; color: var(--text-bright); }
+.admin-input {
+  width: 100%; padding: 13px 16px; background: rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--glass-border); border-radius: 8px; color: #fff;
+  font-family: var(--font-body); font-size: 0.9rem;
+}
+.admin-input:focus { outline: none; border-color: var(--red-bright); box-shadow: 0 0 20px rgba(139, 0, 0, 0.45); }
+.admin-label {
+  display: block; font-size: 0.62rem; font-weight: 800; letter-spacing: 0.22em;
+  text-transform: uppercase; color: var(--red-bright); margin-bottom: 8px; margin-top: 18px;
+}
+.admin-msg { padding: 14px; border-radius: 8px; margin-top: 20px; font-size: 0.85rem; display: none; }
+.admin-msg.show { display: block; }
+.admin-msg.ok { background: rgba(0, 128, 0, 0.15); border: 1px solid #0a5c0a; color: #7fdc7f; }
+.admin-msg.err { background: rgba(139, 0, 0, 0.15); border: 1px solid var(--red-1); color: #ff9e9e; }
+.preview-box {
+  display: none; margin-top: 20px; padding: 18px; border-radius: 10px;
+  background: var(--glass-bg); border: 1px solid var(--glass-border);
+  flex-direction: column; gap: 14px;
+}
+.preview-box.show { display: flex; }
+.preview-box iframe { width: 100%; aspect-ratio: 16/9; border-radius: 8px; border: 0; }
+.vid-list { margin-top: 40px; border-top: 1px solid var(--glass-border); padding-top: 30px; }
+.vid-item {
+  display: grid; grid-template-columns: 80px 1fr auto; gap: 14px; align-items: center;
+  padding: 12px; margin-bottom: 10px; background: var(--glass-bg);
+  border: 1px solid var(--glass-border); border-radius: 10px;
+}
+.vid-item img { width: 80px; height: 60px; border-radius: 6px; object-fit: cover; background: #111; }
+.vid-item .info h4 { color: #fff; font-size: 0.85rem; margin-bottom: 3px; }
+.vid-item .info p { color: var(--muted); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; }
+.vid-item .del {
+  background: rgba(139, 0, 0, 0.3); border: 1px solid var(--red-1); color: #ff9e9e;
+  width: 34px; height: 34px; border-radius: 50%; cursor: pointer;
+}
+.vid-item .del:hover { background: var(--red-bright); color: #fff; }
+</style>
+</head>
+<body>
+
+<div class="bg-layer bg-gradient"></div>
+<div class="bg-layer bg-glow"></div>
+<div class="bg-layer bg-noise"></div>
+<canvas id="particles"></canvas>
+
+<nav class="navbar">
+  <div class="nav-container">
+    <a href="index.html" class="nav-logo">
+      <span class="logo-mark">M</span>
+      <span class="logo-text">MORIMORSELS <em>JDOT</em></span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="music.html">Music</a></li>
+      <li><a href="videos.html">Videos</a></li>
+      <li><a href="songs.html">All Songs</a></li>
+      <li><a href="gallery.html">Gallery</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="contact.html">Contact</a></li>
+      <li><a href="admin.html">Admin</a></li>
+    </ul>
+    <button class="nav-toggle" aria-label="Menu">☰</button>
+  </div>
+</nav>
+
+<div class="section" style="padding-top: 140px;">
+  <div class="container">
+    <div class="admin-wrap">
+      <div class="admin-card">
+        <h2>Add a Video</h2>
+
+        <label class="admin-label">Paste Video Link</label>
+        <input id="vid-link" class="admin-input" type="text" placeholder="YouTube, Instagram, TikTok, Twitter, Snapchat...">
+        <button id="fetch-btn" class="btn btn-outline full" style="margin-top: 14px;">Auto-fetch</button>
+
+        <div id="preview-box" class="preview-box"></div>
+
+        <label class="admin-label">Title</label>
+        <input id="in-title" class="admin-input" type="text" placeholder="Video title">
+
+        <label class="admin-label">Platform (auto-detected)</label>
+        <input id="in-platform" class="admin-input" type="text" readonly placeholder="Will be detected automatically">
+
+        <label class="admin-label">Category</label>
+        <select id="in-category" class="admin-input">
+          <option value="music-video">Music Video</option>
+          <option value="social">Social Clip</option>
+        </select>
+
+        <button id="add-btn" class="btn btn-primary full" style="margin-top: 24px;">Add Video</button>
+        <div id="admin-msg" class="admin-msg"></div>
+      </div>
+
+      <div class="vid-list">
+        <h2 style="font-family: var(--font-display); color: #fff; text-transform: uppercase; margin-bottom: 20px;">Added Videos</h2>
+        <div id="vid-list"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+
+<script>
+(function () {
+  'use strict';
+
+  var $ = function (s) { return document.querySelector(s); };
+  var currentEmbed = '';
+  var currentPlatform = '';
+  var currentThumb = '';
+
+  function detectPlatform(url) {
+    if (!url) return '';
+    url = url.toLowerCase();
+    if (url.includes('youtube.com') || url.includes('youtu.be')) return 'youtube';
+    if (url.includes('instagram.com')) return 'instagram';
+    if (url.includes('tiktok.com')) return 'tiktok';
+    if (url.includes('twitter.com') || url.includes('x.com')) return 'twitter';
+    if (url.includes('snapchat.com')) return 'snapchat';
+    if (url.includes('facebook.com')) return 'facebook';
+    return '';
+  }
+
+  function buildEmbed(url, platform) {
+    if (platform === 'youtube') {
+      var ytMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+      if (ytMatch) {
+        return {
+          html: '<iframe src="https://www.youtube.com/embed/' + ytMatch[1] + '" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>',
+          thumb: 'https://img.youtube.com/vi/' + ytMatch[1] + '/hqdefault.jpg'
+        };
+      }
+    }
+    if (platform === 'instagram') {
+      var igMatch = url.match(/instagram\.com\/(?:p|reel|tv)\/([a-zA-Z0-9_-]+)/);
+      if (igMatch) {
+        return {
+          html: '<iframe src="https://www.instagram.com/p/' + igMatch[1] + '/embed" allowtransparency="true" scrolling="no" allowfullscreen></iframe>',
+          thumb: ''
+        };
+      }
+    }
+    if (platform === 'tiktok') {
+      var ttMatch = url.match(/tiktok\.com\/.*\/video\/(\d+)/);
+      if (ttMatch) {
+        return {
+          html: '<iframe src="https://www.tiktok.com/embed/v2/' + ttMatch[1] + '" allowfullscreen></iframe>',
+          thumb: ''
+        };
+      }
+    }
+    if (platform === 'twitter') {
+      var twMatch = url.match(/(?:twitter\.com|x\.com)\/\w+\/status\/(\d+)/);
+      if (twMatch) {
+        return {
+          html: '<iframe src="https://platform.twitter.com/embed/Tweet.html?id=' + twMatch[1] + '" allowfullscreen></iframe>',
+          thumb: ''
+        };
+      }
+    }
+    return { html: '', thumb: '' };
+  }
+
+  $('#fetch-btn').addEventListener('click', async function () {
+    var url = $('#vid-link').value.trim();
+    if (!url) { showMsg('Paste a link first.', 'err'); return; }
+
+    var platform = detectPlatform(url);
+    if (!platform) { showMsg('Unsupported platform.', 'err'); return; }
+
+    currentPlatform = platform;
+    $('#in-platform').value = platform;
+
+    var embedData = buildEmbed(url, platform);
+    currentEmbed = embedData.html;
+    currentThumb = embedData.thumb;
+
+    // Auto-fetch title for YouTube
+    if (platform === 'youtube') {
+      try {
+        var oRes = await fetch('https://www.youtube.com/oembed?url=' + encodeURIComponent(url) + '&format=json');
+        if (oRes.ok) {
+          var oData = await oRes.json();
+          if (oData.title) $('#in-title').value = oData.title;
+          if (oData.thumbnail_url) currentThumb = oData.thumbnail_url;
+        }
+      } catch (e) {
+        // Silent — YouTube title not fetched
+      }
+    }
+
+    var pv = $('#preview-box');
+    if (currentEmbed) {
+      pv.innerHTML = currentEmbed;
+      pv.classList.add('show');
+    } else {
+      pv.innerHTML = '<p style="color:var(--muted);font-size:0.85rem;">Embed not available for this URL. Will link directly.</p>';
+      pv.classList.add('show');
+    }
+
+    showMsg('Detected: ' + platform + '. Check title and click Add.', 'ok');
+  });
+
+  $('#add-btn').addEventListener('click', async function () {
+    var url = $('#vid-link').value.trim();
+    var title = $('#in-title').value.trim() || 'Untitled';
+    var platform = $('#in-platform').value.trim();
+    var category = $('#in-category').value;
+
+    if (!url || !platform) { showMsg('Fetch the link first.', 'err'); return; }
+
+    try {
+      var res = await fetch('/api/videos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          url: url,
+          title: title,
+          platform: platform,
+          category: category,
+          embed: currentEmbed,
+          thumbnail: currentThumb,
+        }),
+      });
+
+      if (!res.ok) throw new Error('Failed to save');
+
+      $('#vid-link').value = '';
+      $('#in-title').value = '';
+      $('#in-platform').value = '';
+      $('#preview-box').classList.remove('show');
+      $('#preview-box').innerHTML = '';
+      currentEmbed = ''; currentPlatform = ''; currentThumb = '';
+
+      showMsg('✅ Video added!', 'ok');
+      renderList();
+    } catch (err) {
+      showMsg('Error: ' + err.message, 'err');
+    }
+  });
+
+  function showMsg(text, type) {
+    var msg = $('#admin-msg');
+    msg.textContent = text;
+    msg.className = 'admin-msg ' + type + ' show';
+    setTimeout(function () { msg.classList.remove('show'); }, 4000);
+  }
+
+  async function renderList() {
+    try {
+      var res = await fetch('/api/videos');
+      var list = await res.json();
+      var el = $('#vid-list');
+      if (!list || !list.length) {
+        el.innerHTML = '<p style="color: var(--muted); font-size: 0.85rem;">No videos added yet.</p>';
+        return;
+      }
+      el.innerHTML = list.map(function (v) {
+        return '' +
+          '<div class="vid-item">' +
+            '<img src="' + (v.thumbnail || '') + '" alt="">' +
+            '<div class="info">' +
+              '<h4>' + v.title + '</h4>' +
+              '<p>' + v.platform + ' · ' + v.category + '</p>' +
+            '</div>' +
+            '<button class="del" data-id="' + v.id + '">✕</button>' +
+          '</div>';
+      }).join('');
+
+      document.querySelectorAll('.del').forEach(function (b) {
+        b.addEventListener('click', async function () {
+          if (!confirm('Delete this video?')) return;
+          var id = b.getAttribute('data-id');
+          await fetch('/api/videos?id=' + id, { method: 'DELETE' });
+          renderList();
+        });
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  renderList();
+})();
+</script>
+
+</body>
+</html>

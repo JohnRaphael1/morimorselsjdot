@@ -8,6 +8,40 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;600;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<style>
+.video-tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 50px; flex-wrap: wrap; }
+.tab-btn {
+  padding: 11px 24px; font-size: 0.68rem; font-weight: 800; letter-spacing: 0.18em;
+  text-transform: uppercase; border: 1px solid var(--glass-border); border-radius: 8px;
+  background: var(--glass-bg); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+  color: var(--muted); cursor: pointer; font-family: var(--font-body); transition: all 0.3s var(--ease);
+}
+.tab-btn:hover { color: #fff; border-color: var(--red-1); }
+.tab-btn.active { background: var(--red-1); color: #fff; border-color: var(--red-bright); box-shadow: 0 0 22px var(--red-glow); }
+
+.video-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; }
+.video-card {
+  background: var(--glass-bg); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border); border-radius: var(--radius); overflow: hidden;
+  transition: all 0.3s var(--ease);
+}
+.video-card:hover { border-color: var(--red-bright); box-shadow: 0 0 35px rgba(139, 0, 0, 0.4); }
+.video-embed { aspect-ratio: 16/9; width: 100%; background: #000; }
+.video-embed iframe { width: 100%; height: 100%; border: 0; display: block; }
+.video-embed.square { aspect-ratio: 9/16; max-height: 560px; }
+.video-meta { padding: 18px; }
+.video-meta h3 { font-size: 0.95rem; font-weight: 700; color: var(--text-bright); margin-bottom: 4px; }
+.video-meta p { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
+.platform-chip {
+  display: inline-block; padding: 3px 10px; border-radius: 20px;
+  background: rgba(139, 0, 0, 0.25); border: 1px solid var(--red-1);
+  color: var(--red-bright); font-size: 0.55rem; font-weight: 800;
+  letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 8px;
+}
+.status-text { text-align: center; padding: 60px 20px; color: var(--muted); font-size: 0.85rem; letter-spacing: 0.15em; text-transform: uppercase; }
+.see-more-wrap { text-align: center; margin-top: 50px; }
+@media (max-width: 640px) { .video-grid { grid-template-columns: 1fr; } }
+</style>
 </head>
 <body>
 
@@ -25,10 +59,12 @@
     <ul class="nav-links">
       <li><a href="index.html">Home</a></li>
       <li><a href="music.html">Music</a></li>
-      <li><a href="videos.html" class="active">Videos</a></li>
+      <li><a href="videos.html">Videos</a></li>
+      <li><a href="gallery.html">Gallery</a></li>
       <li><a href="songs.html">All Songs</a></li>
       <li><a href="about.html">About</a></li>
       <li><a href="contact.html">Contact</a></li>
+      <li><a href="admin.html">Admin</a></li>
     </ul>
     <button class="nav-toggle" aria-label="Menu">☰</button>
   </div>
@@ -38,36 +74,115 @@
   <div class="container">
     <p class="section-eyebrow">WATCH</p>
     <h1 class="section-title">VIDEOS</h1>
+    <p class="page-sub">Music videos, freestyles & social clips</p>
   </div>
 </header>
 
 <section class="section">
   <div class="container">
-    <div class="video-grid">
-      <div class="video-card">
-        <div class="video-embed">
-          <iframe width="100%" height="100%" src="https://www.youtube.com/embed/videoseries?list=UU2dxCVjy_6nW7Pyjbgl-IA" title="MoriMorsels JDot Videos" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
-        </div>
-        <div class="video-meta">
-          <h3>Official YouTube Channel</h3>
-          <p>All visuals, music videos & freestyles</p>
-          <a href="https://www.youtube.com/channel/UCU2dxCVjy_6nW7Pyjbgl-IA" target="_blank" rel="noopener" class="btn btn-primary small">Subscribe</a>
-        </div>
-      </div>
+
+    <div class="video-tabs">
+      <button class="tab-btn active" data-cat="all">All</button>
+      <button class="tab-btn" data-cat="music-video">Music Videos</button>
+      <button class="tab-btn" data-cat="social">Social Clips</button>
     </div>
-    <div class="see-more-wrap">
-      <a href="https://www.youtube.com/channel/UCU2dxCVjy_6nW7Pyjbgl-IA/videos" target="_blank" rel="noopener" class="btn btn-outline">See More Videos →</a>
+
+    <div class="video-grid" id="video-container">
+      <p class="status-text">Loading videos…</p>
     </div>
+
+    <div class="see-more-wrap" id="see-more-wrap" style="display:none;">
+      <a href="https://www.youtube.com/channel/UCU2dxCVjy_6nW7Pyjbgl-IA/videos" target="_blank" rel="noopener" class="btn btn-outline">See More on YouTube →</a>
+    </div>
+
   </div>
 </section>
 
-<footer class="footer">
-  <div class="container footer-inner">
-    <div class="footer-brand">MORIMORSELS <em>JDOT</em></div>
-    <p>© 2026 MoriMorsels JDot. All rights reserved.</p>
-  </div>
-</footer>
-
 <script src="script.js"></script>
+
+<script>
+(function () {
+  'use strict';
+
+  if (localStorage.getItem('mmjd_logged') === 'yes') {
+    var a = document.getElementById('nav-admin');
+    if (a) a.style.display = '';
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+
+  function renderVideos(videos) {
+    var container = document.getElementById('video-container');
+    if (!container) return;
+
+    if (!videos || videos.length === 0) {
+      container.innerHTML = '<p class="status-text">No videos yet. Check back soon.</p>';
+      return;
+    }
+
+    var sorted = videos.slice().reverse();
+
+    container.innerHTML = sorted.map(function (v) {
+      var isSquare = (v.platform === 'tiktok' || v.platform === 'instagram' || v.platform === 'snapchat');
+      var embedClass = isSquare ? 'video-embed square' : 'video-embed';
+      var platform = (v.platform || '').charAt(0).toUpperCase() + (v.platform || '').slice(1);
+
+      var embedHtml = v.embed
+        ? v.embed
+        : '<div style="width:100%;height:100%;display:grid;place-items:center;background:#000;color:var(--muted);font-size:0.75rem;text-align:center;padding:20px;">' +
+          '<a href="' + escapeHtml(v.url) + '" target="_blank" style="color:var(--red-bright);">Open on ' + escapeHtml(platform) + ' →</a></div>';
+
+      return '' +
+        '<div class="video-card" data-cat="' + escapeHtml(v.category || 'music-video') + '">' +
+          '<div class="' + embedClass + '">' + embedHtml + '</div>' +
+          '<div class="video-meta">' +
+            '<span class="platform-chip">' + escapeHtml(platform) + '</span>' +
+            '<h3>' + escapeHtml(v.title || 'Untitled') + '</h3>' +
+            '<p><a href="' + escapeHtml(v.url) + '" target="_blank" rel="noopener" style="color:var(--muted);">Open original ↗</a></p>' +
+          '</div>' +
+        '</div>';
+    }).join('');
+
+    // Filters
+    var tabs = document.querySelectorAll('.tab-btn');
+    var cards = document.querySelectorAll('.video-card');
+    tabs.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var cat = btn.getAttribute('data-cat');
+        tabs.forEach(function (b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        cards.forEach(function (c) {
+          var cCat = c.getAttribute('data-cat');
+          c.style.display = (cat === 'all' || cCat === cat) ? '' : 'none';
+        });
+      });
+    });
+
+    var sm = document.getElementById('see-more-wrap');
+    if (sm) sm.style.display = 'block';
+  }
+
+  async function load() {
+    try {
+      var res = await fetch('/api/videos');
+      var videos = await res.json();
+      renderVideos(videos);
+    } catch (err) {
+      var container = document.getElementById('video-container');
+      if (container) container.innerHTML = '<p class="status-text">Could not load videos.</p>';
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', load);
+  } else {
+    load();
+  }
+})();
+</script>
+
 </body>
 </html>

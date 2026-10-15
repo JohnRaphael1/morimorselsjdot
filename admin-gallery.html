@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Gallery | MoriMorsels JDot</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+.admin-wrap { max-width: 720px; margin: 0 auto; }
+.admin-card {
+  background: var(--glass-bg-strong); backdrop-filter: var(--glass-blur-strong); -webkit-backdrop-filter: var(--glass-blur-strong);
+  border: 1px solid var(--glass-border); border-radius: var(--radius); padding: 36px;
+  box-shadow: 0 0 40px rgba(139, 0, 0, 0.2);
+}
+.admin-card h2 { font-family: var(--font-display); font-size: 1.6rem; letter-spacing: 0.03em; text-transform: uppercase; margin-bottom: 24px; color: var(--text-bright); }
+.admin-input {
+  width: 100%; padding: 13px 16px; background: rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--glass-border); border-radius: 8px; color: #fff;
+  font-family: var(--font-body); font-size: 0.9rem;
+}
+.admin-input:focus { outline: none; border-color: var(--red-bright); box-shadow: 0 0 20px rgba(139, 0, 0, 0.45); }
+.admin-label {
+  display: block; font-size: 0.62rem; font-weight: 800; letter-spacing: 0.22em;
+  text-transform: uppercase; color: var(--red-bright); margin-bottom: 8px; margin-top: 18px;
+}
+.admin-msg { padding: 14px; border-radius: 8px; margin-top: 20px; font-size: 0.85rem; display: none; }
+.admin-msg.show { display: block; }
+.admin-msg.ok { background: rgba(0, 128, 0, 0.15); border: 1px solid #0a5c0a; color: #7fdc7f; }
+.admin-msg.err { background: rgba(139, 0, 0, 0.15); border: 1px solid var(--red-1); color: #ff9e9e; }
+.gallery-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; margin-top: 30px; }
+.gal-item { position: relative; aspect-ratio: 1; border-radius: 10px; overflow: hidden; border: 1px solid var(--glass-border); }
+.gal-item img { width: 100%; height: 100%; object-fit: cover; }
+.gal-item .del {
+  position: absolute; top: 6px; right: 6px;
+  background: rgba(0,0,0,0.75); border: 1px solid var(--red-1); color: #ff9e9e;
+  width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-size: 0.85rem;
+}
+.gal-item .del:hover { background: var(--red-bright); color: #fff; }
+.preview-img { margin-top: 16px; max-width: 200px; border-radius: 10px; border: 1px solid var(--glass-border); }
+</style>
+</head>
+<body>
+
+<div class="bg-layer bg-gradient"></div>
+<div class="bg-layer bg-glow"></div>
+<div class="bg-layer bg-noise"></div>
+<canvas id="particles"></canvas>
+
+<nav class="navbar">
+  <div class="nav-container">
+    <a href="index.html" class="nav-logo">
+      <span class="logo-mark">M</span>
+      <span class="logo-text">MORIMORSELS <em>JDOT</em></span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="music.html">Music</a></li>
+      <li><a href="videos.html">Videos</a></li>
+      <li><a href="songs.html">All Songs</a></li>
+      <li><a href="gallery.html">Gallery</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="contact.html">Contact</a></li>
+      <li><a href="admin.html">Admin</a></li>
+    </ul>
+    <button class="nav-toggle" aria-label="Menu">☰</button>
+  </div>
+</nav>
+
+<div class="section" style="padding-top: 140px;">
+  <div class="container">
+    <div class="admin-wrap">
+      <div class="admin-card">
+        <h2>Add a Photo</h2>
+        <label class="admin-label">Image URL *</label>
+        <input id="in-image" class="admin-input" type="text" placeholder="https://... (paste image URL)">
+        <img id="preview-img" class="preview-img" style="display:none;" alt="">
+
+        <label class="admin-label">Caption (optional)</label>
+        <input id="in-caption" class="admin-input" type="text" placeholder="Studio session, etc.">
+
+        <button id="add-btn" class="btn btn-primary full" style="margin-top: 24px;">Add Photo</button>
+        <div id="admin-msg" class="admin-msg"></div>
+      </div>
+
+      <div style="margin-top: 40px;">
+        <h2 style="font-family: var(--font-display); color: #fff; text-transform: uppercase; margin-bottom: 20px;">Added Photos</h2>
+        <div id="gallery-list" class="gallery-list"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+
+<script>
+(function () {
+  'use strict';
+
+  var $ = function (s) { return document.querySelector(s); };
+
+  $('#in-image').addEventListener('input', function () {
+    var v = $('#in-image').value.trim();
+    var img = $('#preview-img');
+    if (v) { img.src = v; img.style.display = 'block'; }
+    else { img.style.display = 'none'; }
+  });
+
+  $('#add-btn').addEventListener('click', async function () {
+    var image = $('#in-image').value.trim();
+    var caption = $('#in-caption').value.trim();
+    if (!image) { showMsg('Image URL required.', 'err'); return; }
+
+    try {
+      var res = await fetch('/api/gallery', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: image, caption: caption }),
+      });
+      if (!res.ok) throw new Error('Failed to save');
+
+      $('#in-image').value = '';
+      $('#in-caption').value = '';
+      $('#preview-img').style.display = 'none';
+      showMsg('✅ Photo added!', 'ok');
+      renderList();
+    } catch (err) {
+      showMsg('Error: ' + err.message, 'err');
+    }
+  });
+
+  function showMsg(text, type) {
+    var msg = $('#admin-msg');
+    msg.textContent = text;
+    msg.className = 'admin-msg ' + type + ' show';
+    setTimeout(function () { msg.classList.remove('show'); }, 4000);
+  }
+
+  async function renderList() {
+    try {
+      var res = await fetch('/api/gallery');
+      var list = await res.json();
+      var el = $('#gallery-list');
+      if (!list || !list.length) {
+        el.innerHTML = '<p style="color: var(--muted); font-size: 0.85rem;">No photos added yet.</p>';
+        return;
+      }
+      el.innerHTML = list.slice().reverse().map(function (img) {
+        return '' +
+          '<div class="gal-item">' +
+            '<img src="' + img.image + '" alt="">' +
+            '<button class="del" data-id="' + img.id + '">✕</button>' +
+          '</div>';
+      }).join('');
+
+      document.querySelectorAll('.del').forEach(function (b) {
+        b.addEventListener('click', async function () {
+          if (!confirm('Delete this photo?')) return;
+          var id = b.getAttribute('data-id');
+          await fetch('/api/gallery?id=' + id, { method: 'DELETE' });
+          renderList();
+        });
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  renderList();
+})();
+</script>
+
+</body>
+</html>
