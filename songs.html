@@ -241,7 +241,7 @@
   <div class="container">
     <p class="section-eyebrow">COMPLETE CATALOG</p>
     <h1 class="section-title">ALL SONGS</h1>
-    <p class="page-sub">Auto-synced with Spotify · Updated daily</p>
+    <p class="page-sub">Auto-synced with Apple Music · Updated live</p>
   </div>
 </header>
 
@@ -252,6 +252,7 @@
       <button class="filter-btn active" data-filter="all">All</button>
       <button class="filter-btn" data-filter="single">Singles</button>
       <button class="filter-btn" data-filter="album">Albums</button>
+      <button class="filter-btn" data-filter="ep">EPs</button>
     </div>
 
     <div class="songs-list" id="songs-container">
@@ -278,7 +279,7 @@
 (function () {
   'use strict';
 
-  // Platforms — every known platform for MoriMorsels JDot
+  // Every known platform for MoriMorsels JDot
   var PLATFORMS = [
     { name: 'Spotify',       url: 'https://open.spotify.com/artist/72RLZjzQjhCvtMraxrqVtO' },
     { name: 'Apple Music',   url: 'https://music.apple.com/ng/artist/morimorsels-jdot/1856608319' },
@@ -350,7 +351,7 @@
       var type = song.type || 'single';
       var platformsHtml = PLATFORMS.map(function (p) {
         var url = p.url;
-        if (p.name === 'Spotify' && song.spotify_url) url = song.spotify_url;
+        if (p.name === 'Apple Music' && song.apple_url) url = song.apple_url;
         return '<a href="' + escapeHtml(url) + '" target="_blank" rel="noopener">' + escapeHtml(p.name) + '</a>';
       }).join('');
 
@@ -435,7 +436,7 @@
   }
 
   function loadSongs() {
-    fetch('/songs-data.json', { cache: 'no-cache' })
+    fetch('/.netlify/functions/update-songs', { cache: 'no-cache' })
       .then(function (res) {
         if (!res.ok) throw new Error('HTTP ' + res.status);
         return res.json();
@@ -450,10 +451,10 @@
         }
       })
       .catch(function (err) {
-        console.warn('Failed to load songs-data.json:', err.message);
+        console.warn('Failed to load songs:', err.message);
         var container = $('#songs-container');
         if (container) {
-          container.innerHTML = '<p class="status-text">Songs loading. Check back shortly.</p>';
+          container.innerHTML = '<p class="status-text">Could not load songs. Try again shortly.</p>';
         }
       });
   }
