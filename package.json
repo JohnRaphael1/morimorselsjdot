@@ -1,13 +1,9 @@
-// {
-//   "dependencies": {
-//     "@upstash/redis": "^1.39.0"
-//   }
-// }
 {
   "name": "morimorselsjdot",
   "version": "1.0.0",
   "type": "module",
+  "private": true,
   "dependencies": {
-    "@upstash/redis": "latest"
+    "@upstash/redis": "^1.39.0"
   }
 }
