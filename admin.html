@@ -134,10 +134,17 @@
   font-size: 0.95rem;
 }
 .admin-song .del:hover { background: var(--red-bright); color: #fff; }
-.admin-nav { display: flex; gap: 10px; margin-bottom: 24px; flex-wrap: wrap; }
-.admin-nav a {
+
+.admin-nav {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+.admin-nav a,
+.admin-nav button {
   flex: 1;
-  min-width: 140px;
+  min-width: 130px;
   text-align: center;
   padding: 12px 16px;
   background: var(--glass-bg);
@@ -149,18 +156,31 @@
   letter-spacing: 0.15em;
   text-transform: uppercase;
   transition: all 0.3s var(--ease);
+  cursor: pointer;
+  font-family: var(--font-body);
 }
-.admin-nav a:hover { color: #fff; border-color: var(--red-1); }
+.admin-nav a:hover,
+.admin-nav button:hover { color: #fff; border-color: var(--red-1); }
 .admin-nav a.active {
   background: var(--red-1);
   color: #fff;
   border-color: var(--red-bright);
   box-shadow: 0 0 22px var(--red-glow);
 }
+.admin-nav button.logout {
+  border-color: #500;
+  color: #ff9e9e;
+}
+.admin-nav button.logout:hover {
+  background: #500;
+  color: #fff;
+  border-color: var(--red-bright);
+}
+
 @media (max-width: 640px) {
   .admin-card { padding: 22px; }
   .row-2, .row-3 { grid-template-columns: 1fr; }
-  .admin-nav a { min-width: 100%; }
+  .admin-nav a, .admin-nav button { min-width: 100%; }
 }
 </style>
 </head>
@@ -191,7 +211,6 @@
   </div>
 </nav>
 
-<!-- LOGIN -->
 <div id="login-screen" class="section" style="padding-top: 140px;">
   <div class="container">
     <div class="admin-wrap">
@@ -208,7 +227,6 @@
   </div>
 </div>
 
-<!-- PANEL -->
 <div id="admin-panel" class="section" style="padding-top: 140px; display: none;">
   <div class="container">
     <div class="admin-wrap">
@@ -217,6 +235,7 @@
         <a href="admin.html" class="active">Songs</a>
         <a href="admin-videos.html">Videos</a>
         <a href="admin-gallery.html">Gallery</a>
+        <button class="logout" id="logout-btn">Logout</button>
       </div>
 
       <div class="admin-card">
@@ -292,7 +311,6 @@
           <button type="button" class="add-track-btn" id="add-track-btn">+ Add Track</button>
 
           <button id="save-btn" class="btn btn-primary full" style="margin-top: 24px;">Save Release</button>
-          <button id="logout-btn" class="btn btn-outline full" style="margin-top: 14px; border-color: #500; color: #ff9e9e;">Logout</button>
         </div>
 
         <div id="admin-msg" class="admin-msg"></div>
@@ -339,13 +357,11 @@
     renderList();
   }
 
-  // ---------- LOGOUT ----------
   $('#logout-btn').addEventListener('click', function () {
     localStorage.removeItem('mmjd_logged');
     location.reload();
   });
 
-  // ---------- TRACK ROWS ----------
   function addTrackRow(value) {
     var container = $('#tracklist-container');
     var row = document.createElement('div');
@@ -372,7 +388,6 @@
 
   $('#add-track-btn').addEventListener('click', function () { addTrackRow(''); });
 
-  // ---------- FETCH ----------
   $('#fetch-btn').addEventListener('click', async function () {
     var url = $('#sp-link').value.trim();
     if (!url) { showMsg('Paste a link first.', 'err'); return; }
@@ -420,7 +435,6 @@
     }
   });
 
-  // ---------- SAVE ----------
   $('#save-btn').addEventListener('click', async function () {
     var name = $('#in-name').value.trim();
     var date = $('#in-date').value;

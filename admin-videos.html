@@ -9,7 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;600;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 <style>
-.admin-wrap { max-width: 720px; margin: 0 auto; }
+.admin-wrap { max-width: 760px; margin: 0 auto; }
 .admin-card {
   background: var(--glass-bg-strong);
   backdrop-filter: var(--glass-blur-strong);
@@ -37,11 +37,7 @@
   font-family: var(--font-body);
   font-size: 0.9rem;
 }
-.admin-input:focus {
-  outline: none;
-  border-color: var(--red-bright);
-  box-shadow: 0 0 20px rgba(139, 0, 0, 0.45);
-}
+.admin-input:focus { outline: none; border-color: var(--red-bright); box-shadow: 0 0 20px rgba(139, 0, 0, 0.45); }
 .admin-label {
   display: block;
   font-size: 0.62rem;
@@ -100,11 +96,11 @@
 }
 .vid-item .del:hover { background: var(--red-bright); color: #fff; }
 
-/* Admin sub-nav */
 .admin-nav { display: flex; gap: 10px; margin-bottom: 24px; flex-wrap: wrap; }
-.admin-nav a {
+.admin-nav a,
+.admin-nav button {
   flex: 1;
-  min-width: 140px;
+  min-width: 130px;
   text-align: center;
   padding: 12px 16px;
   background: var(--glass-bg);
@@ -116,17 +112,22 @@
   letter-spacing: 0.15em;
   text-transform: uppercase;
   transition: all 0.3s var(--ease);
+  cursor: pointer;
+  font-family: var(--font-body);
 }
-.admin-nav a:hover { color: #fff; border-color: var(--red-1); }
+.admin-nav a:hover,
+.admin-nav button:hover { color: #fff; border-color: var(--red-1); }
 .admin-nav a.active {
   background: var(--red-1);
   color: #fff;
   border-color: var(--red-bright);
   box-shadow: 0 0 22px var(--red-glow);
 }
+.admin-nav button.logout { border-color: #500; color: #ff9e9e; }
+.admin-nav button.logout:hover { background: #500; color: #fff; border-color: var(--red-bright); }
 @media (max-width: 640px) {
   .admin-card { padding: 22px; }
-  .admin-nav a { min-width: 100%; }
+  .admin-nav a, .admin-nav button { min-width: 100%; }
 }
 </style>
 </head>
@@ -157,7 +158,23 @@
   </div>
 </nav>
 
-<div class="section" style="padding-top: 140px;">
+<div id="login-screen" class="section" style="padding-top: 140px;">
+  <div class="container">
+    <div class="admin-wrap">
+      <div class="admin-card">
+        <h2>Admin Login</h2>
+        <label class="admin-label">Login ID</label>
+        <input id="login-id" class="admin-input" type="text" placeholder="Enter login ID">
+        <label class="admin-label">Password</label>
+        <input id="login-pass" class="admin-input" type="password" placeholder="Enter password">
+        <button id="login-btn" class="btn btn-primary full" style="margin-top: 20px;">Login</button>
+        <div id="login-msg" class="admin-msg err"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="admin-panel" class="section" style="padding-top: 140px; display: none;">
   <div class="container">
     <div class="admin-wrap">
 
@@ -165,6 +182,7 @@
         <a href="admin.html">Songs</a>
         <a href="admin-videos.html" class="active">Videos</a>
         <a href="admin-gallery.html">Gallery</a>
+        <button class="logout" id="logout-btn">Logout</button>
       </div>
 
       <div class="admin-card">
@@ -206,10 +224,39 @@
 (function () {
   'use strict';
 
+  var ADMIN_ID = 'MMJD2026';
+  var ADMIN_PASS = 'MMJDOT';
+
   var $ = function (s) { return document.querySelector(s); };
   var currentEmbed = '';
   var currentPlatform = '';
   var currentThumb = '';
+
+  if (localStorage.getItem('mmjd_logged') === 'yes') showPanel();
+
+  $('#login-btn').addEventListener('click', function () {
+    var id = $('#login-id').value.trim();
+    var pw = $('#login-pass').value.trim();
+    if (id === ADMIN_ID && pw === ADMIN_PASS) {
+      localStorage.setItem('mmjd_logged', 'yes');
+      showPanel();
+    } else {
+      var msg = $('#login-msg');
+      msg.textContent = 'Wrong login ID or password.';
+      msg.className = 'admin-msg err show';
+    }
+  });
+
+  function showPanel() {
+    $('#login-screen').style.display = 'none';
+    $('#admin-panel').style.display = 'block';
+    renderList();
+  }
+
+  $('#logout-btn').addEventListener('click', function () {
+    localStorage.removeItem('mmjd_logged');
+    location.reload();
+  });
 
   function detectPlatform(url) {
     if (!url) return '';
@@ -285,9 +332,7 @@
           if (oData.title) $('#in-title').value = oData.title;
           if (oData.thumbnail_url) currentThumb = oData.thumbnail_url;
         }
-      } catch (e) {
-        // Silent
-      }
+      } catch (e) {}
     }
 
     var pv = $('#preview-box');
@@ -380,8 +425,6 @@
       console.error(err);
     }
   }
-
-  renderList();
 })();
 </script>
 
