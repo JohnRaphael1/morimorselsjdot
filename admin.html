@@ -9,7 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;600;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 <style>
-.admin-wrap { max-width: 720px; margin: 0 auto; }
+.admin-wrap { max-width: 760px; margin: 0 auto; }
 .admin-card {
   background: var(--glass-bg-strong);
   backdrop-filter: var(--glass-blur-strong);
@@ -63,6 +63,7 @@
 .admin-msg.show { display: block; }
 .admin-msg.ok { background: rgba(0, 128, 0, 0.15); border: 1px solid #0a5c0a; color: #7fdc7f; }
 .admin-msg.err { background: rgba(139, 0, 0, 0.15); border: 1px solid var(--red-1); color: #ff9e9e; }
+.admin-msg.info { background: rgba(139, 139, 0, 0.15); border: 1px solid #5c5c0a; color: #dcdc7f; }
 .preview-box {
   display: none;
   margin-top: 20px;
@@ -74,9 +75,41 @@
   align-items: center;
 }
 .preview-box.show { display: flex; }
-.preview-box img { width: 80px; height: 80px; border-radius: 8px; object-fit: cover; }
+.preview-box img { width: 90px; height: 90px; border-radius: 8px; object-fit: cover; }
 .preview-box .pv-info h4 { color: #fff; font-size: 1rem; margin-bottom: 4px; }
 .preview-box .pv-info p { color: var(--muted); font-size: 0.75rem; }
+.row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+.track-input-row {
+  display: grid;
+  grid-template-columns: 30px 1fr auto;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.track-input-row span { color: var(--muted); font-size: 0.75rem; }
+.track-input-row button {
+  background: rgba(139, 0, 0, 0.3);
+  border: 1px solid var(--red-1);
+  color: #ff9e9e;
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+.add-track-btn {
+  padding: 10px;
+  background: var(--glass-bg);
+  border: 1px dashed var(--glass-border);
+  border-radius: 8px;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  width: 100%;
+  margin-top: 8px;
+}
+.add-track-btn:hover { border-color: var(--red-bright); color: #fff; }
 .admin-song {
   display: grid;
   grid-template-columns: 60px 1fr auto;
@@ -101,29 +134,7 @@
   font-size: 0.95rem;
 }
 .admin-song .del:hover { background: var(--red-bright); color: #fff; }
-.track-list-preview {
-  margin-top: 10px;
-  padding: 12px;
-  background: rgba(0,0,0,0.4);
-  border-radius: 8px;
-  max-height: 200px;
-  overflow-y: auto;
-}
-.track-list-preview li {
-  list-style: none;
-  padding: 4px 0;
-  color: var(--muted);
-  font-size: 0.8rem;
-}
-.track-list-preview li::before { content: '♪ '; color: var(--red-bright); }
-
-/* Admin sub-nav */
-.admin-nav {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 24px;
-  flex-wrap: wrap;
-}
+.admin-nav { display: flex; gap: 10px; margin-bottom: 24px; flex-wrap: wrap; }
 .admin-nav a {
   flex: 1;
   min-width: 140px;
@@ -146,9 +157,9 @@
   border-color: var(--red-bright);
   box-shadow: 0 0 22px var(--red-glow);
 }
-
 @media (max-width: 640px) {
   .admin-card { padding: 22px; }
+  .row-2, .row-3 { grid-template-columns: 1fr; }
   .admin-nav a { min-width: 100%; }
 }
 </style>
@@ -180,7 +191,6 @@
   </div>
 </nav>
 
-<!-- LOGIN SCREEN -->
 <div id="login-screen" class="section" style="padding-top: 140px;">
   <div class="container">
     <div class="admin-wrap">
@@ -197,12 +207,10 @@
   </div>
 </div>
 
-<!-- ADMIN PANEL -->
 <div id="admin-panel" class="section" style="padding-top: 140px; display: none;">
   <div class="container">
     <div class="admin-wrap">
 
-      <!-- Quick nav between admin sections -->
       <div class="admin-nav">
         <a href="admin.html" class="active">Songs</a>
         <a href="admin-videos.html">Videos</a>
@@ -214,7 +222,7 @@
 
         <label class="admin-label">Paste Spotify or Apple Music Link</label>
         <input id="sp-link" class="admin-input" type="text" placeholder="https://open.spotify.com/... OR https://music.apple.com/...">
-        <button id="fetch-btn" class="btn btn-primary full" style="margin-top: 14px;">Auto-Fetch & Add</button>
+        <button id="fetch-btn" class="btn btn-outline full" style="margin-top: 14px;">Auto-Fetch</button>
 
         <div id="preview-box" class="preview-box">
           <img id="pv-img" src="" alt="">
@@ -225,24 +233,66 @@
           </div>
         </div>
 
-        <div id="tracklist-preview" style="display: none;">
-          <label class="admin-label">Tracklist Preview</label>
-          <ul class="track-list-preview" id="tracklist-ul"></ul>
+        <div id="form-fields" style="display: none; margin-top: 10px; border-top: 1px solid var(--glass-border); padding-top: 20px;">
+
+          <label class="admin-label">Release Name *</label>
+          <input id="in-name" class="admin-input" type="text" placeholder="Song / EP / Album name">
+
+          <div class="row-2">
+            <div>
+              <label class="admin-label">Main Artist</label>
+              <input id="in-artist" class="admin-input" type="text">
+            </div>
+            <div>
+              <label class="admin-label">Featured Artist(s)</label>
+              <input id="in-featured" class="admin-input" type="text" placeholder="Comma separated">
+            </div>
+          </div>
+
+          <label class="admin-label">Cover Image URL</label>
+          <input id="in-cover" class="admin-input" type="text">
+
+          <div class="row-3">
+            <div>
+              <label class="admin-label">Release Date *</label>
+              <input id="in-date" class="admin-input" type="date">
+            </div>
+            <div>
+              <label class="admin-label">Type *</label>
+              <select id="in-type" class="admin-input">
+                <option value="single">Single</option>
+                <option value="ep">EP</option>
+                <option value="album">Album</option>
+              </select>
+            </div>
+            <div>
+              <label class="admin-label">Total Tracks *</label>
+              <input id="in-tracks" class="admin-input" type="number" min="1" value="1">
+            </div>
+          </div>
+
+          <div class="row-2">
+            <div>
+              <label class="admin-label">Genre</label>
+              <input id="in-genre" class="admin-input" type="text">
+            </div>
+            <div>
+              <label class="admin-label">Record Label</label>
+              <input id="in-label" class="admin-input" type="text" placeholder="Manual">
+            </div>
+          </div>
+
+          <label class="admin-label">Producer</label>
+          <input id="in-producer" class="admin-input" type="text" placeholder="Manual">
+
+          <label class="admin-label">Tracklist (for EP / Album)</label>
+          <div id="tracklist-container"></div>
+          <button type="button" class="add-track-btn" id="add-track-btn">+ Add Track</button>
+
+          <button id="save-btn" class="btn btn-primary full" style="margin-top: 24px;">Save Release</button>
         </div>
 
         <div id="admin-msg" class="admin-msg"></div>
-
-        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--glass-border);">
-          <p style="font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em;">Optional details</p>
-          <label class="admin-label">Producer</label>
-          <input id="in-producer" class="admin-input" type="text" placeholder="Producer name">
-          <label class="admin-label">Record Label</label>
-          <input id="in-label" class="admin-input" type="text" placeholder="Label name">
-          <label class="admin-label">Genre</label>
-          <input id="in-genre" class="admin-input" type="text" placeholder="e.g. Drill, Trap, Hip-Hop">
-        </div>
-
-        <button id="logout-btn" class="btn btn-outline full" style="margin-top: 30px; border-color: #500; color: #ff9e9e;">Logout</button>
       </div>
 
       <div style="margin-top: 40px;">
@@ -261,15 +311,12 @@
 
   var ADMIN_ID = 'MMJD2026';
   var ADMIN_PASS = 'MMJDOT';
+  var currentUrl = '';
 
   var $ = function (s) { return document.querySelector(s); };
 
-  // Restore session
-  if (localStorage.getItem('mmjd_logged') === 'yes') {
-    showPanel();
-  }
+  if (localStorage.getItem('mmjd_logged') === 'yes') showPanel();
 
-  // Login
   $('#login-btn').addEventListener('click', function () {
     var id = $('#login-id').value.trim();
     var pw = $('#login-pass').value.trim();
@@ -289,77 +336,131 @@
     renderList();
   }
 
-  // Logout
-  $('#logout-btn').addEventListener('click', function () {
-    localStorage.removeItem('mmjd_logged');
-    location.reload();
-  });
+  // Track rows
+  function addTrackRow(value) {
+    var container = $('#tracklist-container');
+    var row = document.createElement('div');
+    row.className = 'track-input-row';
+    row.innerHTML =
+      '<span></span>' +
+      '<input class="admin-input" type="text" placeholder="Track name" value="' + (value || '').replace(/"/g, '&quot;') + '">' +
+      '<button type="button">✕</button>';
+    row.querySelector('button').addEventListener('click', function () {
+      row.remove();
+      renumber();
+    });
+    container.appendChild(row);
+    renumber();
+  }
 
-  // ---------- AUTO FETCH ----------
+  function renumber() {
+    var rows = document.querySelectorAll('.track-input-row');
+    rows.forEach(function (r, i) {
+      r.querySelector('span').textContent = (i + 1) + '.';
+    });
+    $('#in-tracks').value = rows.length || 1;
+  }
+
+  $('#add-track-btn').addEventListener('click', function () { addTrackRow(''); });
+
+  // ---------- FETCH ----------
   $('#fetch-btn').addEventListener('click', async function () {
     var url = $('#sp-link').value.trim();
     if (!url) { showMsg('Paste a link first.', 'err'); return; }
 
-    showMsg('Fetching data...', 'ok');
+    showMsg('Fetching…', 'info');
 
     try {
-      var res = await fetch('/api/songs', {
+      var res = await fetch('/api/fetch', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'fetch', url: url })
+        body: JSON.stringify({ url: url })
       });
 
       var data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Fetch failed');
 
-      // Show preview
+      currentUrl = url;
+
+      // Preview
       $('#pv-img').src = data.cover || '';
       $('#pv-title').textContent = data.name || '—';
-      $('#pv-artist').textContent = data.artist + (data.featured ? ' feat. ' + data.featured : '');
-      $('#pv-meta').textContent = data.type.toUpperCase() + ' · ' + data.total_tracks + ' Songs · ' + data.release_date;
+      $('#pv-artist').textContent = (data.artist || '') + (data.featured ? ' feat. ' + data.featured : '');
+      $('#pv-meta').textContent = (data.type || '').toUpperCase() + ' · ' + (data.total_tracks || 1) + ' track(s) · ' + (data.release_date || '');
       $('#preview-box').classList.add('show');
 
-      // Tracklist preview
-      if (data.tracklist && data.tracklist.length > 0) {
-        $('#tracklist-ul').innerHTML = data.tracklist.map(function (t) {
-          return '<li>' + t + '</li>';
-        }).join('');
-        $('#tracklist-preview').style.display = 'block';
-      } else {
-        $('#tracklist-preview').style.display = 'none';
+      // Fill form
+      $('#in-name').value = data.name || '';
+      $('#in-artist').value = data.artist || 'MoriMorsels JDot';
+      $('#in-featured').value = data.featured || '';
+      $('#in-cover').value = data.cover || '';
+      $('#in-date').value = data.release_date || '';
+      $('#in-type').value = data.type || 'single';
+      $('#in-tracks').value = data.total_tracks || 1;
+      $('#in-genre').value = data.genre || '';
+      $('#in-label').value = data.label || '';
+      $('#in-producer').value = data.producer || '';
+
+      // Fill tracklist
+      $('#tracklist-container').innerHTML = '';
+      if (data.tracklist && data.tracklist.length) {
+        data.tracklist.forEach(function (t) { addTrackRow(t); });
       }
 
-      // Save
-      var saveRes = await fetch('/api/songs', {
+      $('#form-fields').style.display = 'block';
+      showMsg('✅ Auto-fetched. Check everything, then Save.', 'ok');
+    } catch (err) {
+      showMsg('Error: ' + err.message, 'err');
+    }
+  });
+
+  // ---------- SAVE ----------
+  $('#save-btn').addEventListener('click', async function () {
+    var name = $('#in-name').value.trim();
+    var date = $('#in-date').value;
+    if (!name || !date) { showMsg('Name and release date are required.', 'err'); return; }
+
+    // Collect tracklist
+    var tracklist = [];
+    document.querySelectorAll('.track-input-row input').forEach(function (inp) {
+      var v = inp.value.trim();
+      if (v) tracklist.push(v);
+    });
+
+    try {
+      var res = await fetch('/api/songs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name: data.name,
-          artist: data.artist,
-          featured: data.featured,
-          cover: data.cover,
-          release_date: data.release_date,
-          type: data.type,
-          total_tracks: data.total_tracks,
-          tracklist: data.tracklist,
-          spotify_url: url.includes('spotify') ? url : '',
-          apple_url: url.includes('apple') ? url : '',
-          producer: $('#in-producer').value.trim(),
+          name: name,
+          artist: $('#in-artist').value.trim(),
+          featured: $('#in-featured').value.trim(),
+          cover: $('#in-cover').value.trim(),
+          release_date: date,
+          type: $('#in-type').value,
+          total_tracks: parseInt($('#in-tracks').value, 10) || 1,
+          tracklist: tracklist,
+          genre: $('#in-genre').value.trim(),
           label: $('#in-label').value.trim(),
-          genre: $('#in-genre').value.trim()
+          producer: $('#in-producer').value.trim(),
+          spotify_url: currentUrl.includes('spotify') ? currentUrl : '',
+          apple_url: currentUrl.includes('apple') ? currentUrl : ''
         })
       });
 
-      if (!saveRes.ok) throw new Error('Save failed');
+      if (!res.ok) {
+        var err = await res.json();
+        throw new Error(err.error || 'Save failed');
+      }
 
       // Reset
       $('#sp-link').value = '';
-      $('#in-producer').value = '';
-      $('#in-label').value = '';
-      $('#in-genre').value = '';
-      showMsg('✅ Release added!', 'ok');
+      currentUrl = '';
+      $('#preview-box').classList.remove('show');
+      $('#form-fields').style.display = 'none';
+      $('#tracklist-container').innerHTML = '';
+      showMsg('✅ Release saved!', 'ok');
       renderList();
-
     } catch (err) {
       showMsg('Error: ' + err.message, 'err');
     }
@@ -387,7 +488,7 @@
             '<img src="' + (s.cover || '') + '" alt="">' +
             '<div class="info">' +
               '<h4>' + s.name + feat + '</h4>' +
-              '<p>' + s.type + ' · ' + s.total_tracks + ' song' + (s.total_tracks > 1 ? 's' : '') + ' · ' + s.release_date + '</p>' +
+              '<p>' + s.type + ' · ' + s.total_tracks + ' track(s) · ' + s.release_date + '</p>' +
             '</div>' +
             '<button class="del" data-id="' + s.id + '">✕</button>' +
           '</div>';
