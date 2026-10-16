@@ -191,6 +191,7 @@
   </div>
 </nav>
 
+<!-- LOGIN -->
 <div id="login-screen" class="section" style="padding-top: 140px;">
   <div class="container">
     <div class="admin-wrap">
@@ -207,6 +208,7 @@
   </div>
 </div>
 
+<!-- PANEL -->
 <div id="admin-panel" class="section" style="padding-top: 140px; display: none;">
   <div class="container">
     <div class="admin-wrap">
@@ -290,6 +292,7 @@
           <button type="button" class="add-track-btn" id="add-track-btn">+ Add Track</button>
 
           <button id="save-btn" class="btn btn-primary full" style="margin-top: 24px;">Save Release</button>
+          <button id="logout-btn" class="btn btn-outline full" style="margin-top: 14px; border-color: #500; color: #ff9e9e;">Logout</button>
         </div>
 
         <div id="admin-msg" class="admin-msg"></div>
@@ -336,7 +339,13 @@
     renderList();
   }
 
-  // Track rows
+  // ---------- LOGOUT ----------
+  $('#logout-btn').addEventListener('click', function () {
+    localStorage.removeItem('mmjd_logged');
+    location.reload();
+  });
+
+  // ---------- TRACK ROWS ----------
   function addTrackRow(value) {
     var container = $('#tracklist-container');
     var row = document.createElement('div');
@@ -382,14 +391,12 @@
 
       currentUrl = url;
 
-      // Preview
       $('#pv-img').src = data.cover || '';
       $('#pv-title').textContent = data.name || '—';
       $('#pv-artist').textContent = (data.artist || '') + (data.featured ? ' feat. ' + data.featured : '');
       $('#pv-meta').textContent = (data.type || '').toUpperCase() + ' · ' + (data.total_tracks || 1) + ' track(s) · ' + (data.release_date || '');
       $('#preview-box').classList.add('show');
 
-      // Fill form
       $('#in-name').value = data.name || '';
       $('#in-artist').value = data.artist || 'MoriMorsels JDot';
       $('#in-featured').value = data.featured || '';
@@ -401,7 +408,6 @@
       $('#in-label').value = data.label || '';
       $('#in-producer').value = data.producer || '';
 
-      // Fill tracklist
       $('#tracklist-container').innerHTML = '';
       if (data.tracklist && data.tracklist.length) {
         data.tracklist.forEach(function (t) { addTrackRow(t); });
@@ -420,7 +426,6 @@
     var date = $('#in-date').value;
     if (!name || !date) { showMsg('Name and release date are required.', 'err'); return; }
 
-    // Collect tracklist
     var tracklist = [];
     document.querySelectorAll('.track-input-row input').forEach(function (inp) {
       var v = inp.value.trim();
@@ -453,7 +458,6 @@
         throw new Error(err.error || 'Save failed');
       }
 
-      // Reset
       $('#sp-link').value = '';
       currentUrl = '';
       $('#preview-box').classList.remove('show');
